@@ -577,8 +577,10 @@ function openAddModal(type) {
   document.getElementById('tx-desc').value = '';
   document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
   document.getElementById('ticket-preview').classList.add('hidden');
-  document.getElementById('ticket-placeholder').classList.remove('hidden');
+  document.getElementById('ticket-actions-row').classList.remove('hidden');
   document.getElementById('ticket-remove').classList.add('hidden');
+  document.getElementById('ocr-result').classList.add('hidden');
+  document.getElementById('ocr-status').classList.add('hidden');
 
   const isReminder = type === 'recordatorio';
   document.getElementById('group-reminder').classList.toggle('hidden', !isReminder);
@@ -611,13 +613,15 @@ async function openEditModal(id) {
   if (tx.ticket) {
     document.getElementById('ticket-preview').src = tx.ticket;
     document.getElementById('ticket-preview').classList.remove('hidden');
-    document.getElementById('ticket-placeholder').classList.add('hidden');
+    document.getElementById('ticket-actions-row').classList.add('hidden');
     document.getElementById('ticket-remove').classList.remove('hidden');
   } else {
     document.getElementById('ticket-preview').classList.add('hidden');
-    document.getElementById('ticket-placeholder').classList.remove('hidden');
+    document.getElementById('ticket-actions-row').classList.remove('hidden');
     document.getElementById('ticket-remove').classList.add('hidden');
   }
+  document.getElementById('ocr-result').classList.add('hidden');
+  document.getElementById('ocr-status').classList.add('hidden');
 
   renderCategoryChips(tx.type);
   selectedCategory = tx.category || '';
@@ -703,7 +707,7 @@ async function deleteTransaction(id) {
 }
 
 /* ===========================
-   TICKET UPLOAD
+   TICKET UPLOAD + OCR
    =========================== */
 function setupTicketUpload() {
   document.getElementById('ticket-file').addEventListener('change', function(e) {
@@ -712,21 +716,158 @@ function setupTicketUpload() {
     const reader = new FileReader();
     reader.onload = function(ev) {
       ticketDataUrl = ev.target.result;
-      document.getElementById('ticket-preview').src = ticketDataUrl;
-      document.getElementById('ticket-preview').classList.remove('hidden');
-      document.getElementById('ticket-placeholder').classList.add('hidden');
-      document.getElementById('ticket-remove').classList.remove('hidden');
+      showTicketPreview();
     };
     reader.readAsDataURL(file);
   });
+}
+
+function showTicketPreview() {
+  document.getElementById('ticket-preview').src = ticketDataUrl;
+  document.getElementById('ticket-preview').classList.remove('hidden');
+  document.getElementById('ticket-actions-row').classList.add('hidden');
+  document.getElementById('ticket-remove').classList.remove('hidden');
+}
+
+async function scanTicket() {
+  if (typeof Tesseract === 'undefined') {
+    showToast('Esperá unos segundos, cargando motor de escaneo...');
+    return;
+  }
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.capture = 'environment';
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      ticketDataUrl = ev.target.result;
+      showTicketPreview();
+      await runOCR(ticketDataUrl);
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+async function runOCR(imageDataUrl) {
+  const statusEl = document.getElementById('ocr-status');
+  const resultEl = document.getElementById('ocr-result');
+  const titleEl = document.getElementById('ocr-title');
+  const progressEl = document.getElementById('ocr-progress');
+
+  resultEl.classList.add('hidden');
+  statusEl.classList.remove('hidden');
+  titleEl.textContent = 'Leyendo ticket...';
+  progressEl.textContent = 'Iniciando...';
+
+  try {
+    const result = await Tesseract.recognize(imageDataUrl, 'spa', {
+      logger: m => {
+        if (m.status === 'recognizing text') {
+          progressEl.textContent = Math.round(m.progress * 100) + '%';
+        } else if (m.status === 'loading language traineddata') {
+          titleEl.textContent = 'Descargando idioma (1ra vez, demora un poco)';
+        } else if (m.status === 'initializing api') {
+          titleEl.textContent = 'Preparando lectura...';
+        }
+      }
+    });
+    const text = result.data.text;
+    const amount = extractAmount(text);
+    statusEl.classList.add('hidden');
+    if (amount) {
+      document.getElementById('tx-amount').value = amount.toFixed(2);
+      document.getElementById('ocr-result-amount').textContent = formatCurrency(amount);
+      resultEl.classList.remove('hidden');
+      showToast('Importe detectado: ' + formatCurrency(amount));
+      const descField = document.getElementById('tx-desc');
+      if (!descField.value) {
+        const merchant = extractMerchant(text);
+        if (merchant) descField.value = merchant;
+      }
+    } else {
+      showToast('No se pudo detectar el importe. Cargalo a mano.');
+    }
+  } catch (err) {
+    statusEl.classList.add('hidden');
+    showToast('Error al leer la foto');
+    console.error('OCR error:', err);
+  }
+}
+
+function extractAmount(text) {
+  if (!text) return null;
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  const candidates = [];
+
+  const priorityKeywords = /\b(total|importe|total\s*a\s*pagar|a\s*pagar|monto)\b/i;
+  const negativeKeywords = /\b(subtotal|descuento|vuelto|cambio|efectivo\s*entregado|saldo|iva)\b/i;
+
+  const moneyRegex = /\$?\s*([0-9]{1,3}(?:[.,][0-9]{3})*(?:[.,][0-9]{2})?|[0-9]+(?:[.,][0-9]{2})?)/g;
+
+  lines.forEach((line, idx) => {
+    const hasPriority = priorityKeywords.test(line);
+    const hasNegative = negativeKeywords.test(line);
+    let match;
+    moneyRegex.lastIndex = 0;
+    while ((match = moneyRegex.exec(line)) !== null) {
+      const raw = match[1];
+      const num = parseAmountString(raw);
+      if (num === null || num < 1 || num > 100000000) continue;
+      let score = 0;
+      if (hasPriority) score += 100;
+      if (hasNegative) score -= 50;
+      if (idx >= lines.length - 5) score += 20;
+      score += Math.log10(num + 1) * 5;
+      if (line.includes('$')) score += 10;
+      candidates.push({ amount: num, score, line });
+    }
+  });
+
+  if (candidates.length === 0) return null;
+  candidates.sort((a, b) => b.score - a.score);
+  return candidates[0].amount;
+}
+
+function parseAmountString(s) {
+  if (!s) return null;
+  let clean = s.replace(/\s/g, '');
+  const lastComma = clean.lastIndexOf(',');
+  const lastDot = clean.lastIndexOf('.');
+  if (lastComma > lastDot) {
+    clean = clean.replace(/\./g, '').replace(',', '.');
+  } else if (lastDot > lastComma) {
+    clean = clean.replace(/,/g, '');
+  } else {
+    clean = clean.replace(/[.,]/g, '');
+  }
+  const n = parseFloat(clean);
+  return isNaN(n) ? null : n;
+}
+
+function extractMerchant(text) {
+  if (!text) return null;
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length >= 3);
+  for (let i = 0; i < Math.min(3, lines.length); i++) {
+    const line = lines[i];
+    if (/^[A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ\s\.&]{2,30}$/.test(line) && !/[0-9]/.test(line)) {
+      return line.substring(0, 40);
+    }
+  }
+  return null;
 }
 
 function removeTicket() {
   ticketDataUrl = null;
   document.getElementById('ticket-file').value = '';
   document.getElementById('ticket-preview').classList.add('hidden');
-  document.getElementById('ticket-placeholder').classList.remove('hidden');
+  document.getElementById('ticket-actions-row').classList.remove('hidden');
   document.getElementById('ticket-remove').classList.add('hidden');
+  document.getElementById('ocr-result').classList.add('hidden');
+  document.getElementById('ocr-status').classList.add('hidden');
 }
 
 function viewTicket(src) {

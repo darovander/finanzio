@@ -1,5 +1,5 @@
 /* sw.js — Finanzio Service Worker */
-const CACHE = 'finanzio-v1';
+const CACHE = 'finanzio-v2';
 const ASSETS = [
   '/',
   '/index.html',
