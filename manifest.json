@@ -1,0 +1,42 @@
+{
+  "name": "Finanzio",
+  "short_name": "Finanzio",
+  "description": "Tu asistente financiero personal",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#6C63FF",
+  "theme_color": "#6C63FF",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Nuevo gasto",
+      "short_name": "Gasto",
+      "description": "Registrar un gasto rápido",
+      "url": "/?action=add-gasto",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Lista del súper",
+      "short_name": "Súper",
+      "description": "Abrir lista del supermercado",
+      "url": "/?view=super",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

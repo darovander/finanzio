@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#6C63FF" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0F0F1A" media="(prefers-color-scheme: dark)" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Finanzio" />
+  <meta name="description" content="Tu asistente financiero personal" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/png" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <title>Finanzio</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-theme="auto">
+
+  <!-- Install Banner -->
+  <div id="install-banner" class="install-banner hidden">
+    <div class="install-banner-content">
+      <span class="install-icon">📲</span>
+      <div>
+        <p class="install-title">Instalá Finanzio</p>
+        <p class="install-sub">Acceso rápido desde tu pantalla de inicio</p>
+      </div>
+    </div>
+    <div class="install-actions">
+      <button id="install-btn" class="btn-install">Instalar</button>
+      <button id="install-dismiss" class="btn-dismiss">✕</button>
+    </div>
+  </div>
+
+  <!-- App Shell -->
+  <div id="app">
+
+    <!-- Header -->
+    <header class="app-header" id="app-header">
+      <div class="header-left">
+        <button class="header-back hidden" id="back-btn" aria-label="Volver">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M12 4L6 10L12 16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="header-brand" id="header-brand">
+          <span class="logo-mark">₿</span>
+          <span class="app-title">Finanzio</span>
+        </div>
+        <h2 class="page-title hidden" id="page-title"></h2>
+      </div>
+      <div class="header-right">
+        <button class="header-icon-btn" id="theme-toggle" aria-label="Cambiar tema">
+          <svg id="icon-sun" width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="3.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 2V4M10 16V18M2 10H4M16 10H18M4.22 4.22L5.64 5.64M14.36 14.36L15.78 15.78M4.22 15.78L5.64 14.36M14.36 5.64L15.78 4.22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <svg id="icon-moon" class="hidden" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M17 11.5A7 7 0 0 1 8.5 3a7.002 7.002 0 0 0 0 14A7.001 7.001 0 0 0 17 11.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="header-icon-btn" id="notifications-btn" aria-label="Recordatorios">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2a6 6 0 0 1 6 6c0 3.5 1.5 5 1.5 5h-15S4 11.5 4 8a6 6 0 0 1 6-6Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8.5 17a1.5 1.5 0 0 0 3 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <span class="notif-badge hidden" id="notif-badge">0</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main id="main-content">
+
+      <!-- DASHBOARD VIEW -->
+      <section id="view-dashboard" class="view active">
+        
+        <!-- Month Selector + Balance Hero -->
+        <div class="hero-section">
+          <div class="month-nav">
+            <button class="month-btn" id="prev-month" aria-label="Mes anterior">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 4L6 8L10 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <span class="month-label" id="month-label">Junio 2025</span>
+            <button class="month-btn" id="next-month" aria-label="Mes siguiente">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4L10 8L6 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+          <div class="balance-hero">
+            <p class="balance-label">Balance del mes</p>
+            <p class="balance-amount" id="hero-balance">$0</p>
+            <div class="balance-pills">
+              <span class="pill pill-income"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 9V3M3 6L6 3L9 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="hero-income">$0</span></span>
+              <span class="pill pill-expense"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 3V9M9 6L6 9L3 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="hero-expense">$0</span></span>
+            </div>
+          </div>
+          <!-- Health Score -->
+          <div class="health-card">
+            <div class="health-info">
+              <p class="health-label">Salud financiera</p>
+              <p class="health-score" id="health-score">--</p>
+            </div>
+            <div class="health-ring-wrap">
+              <svg class="health-ring" width="52" height="52" viewBox="0 0 52 52">
+                <circle cx="26" cy="26" r="22" fill="none" stroke="var(--ring-bg)" stroke-width="4"/>
+                <circle id="health-arc" cx="26" cy="26" r="22" fill="none" stroke="var(--ring-fill)" stroke-width="4" stroke-linecap="round" stroke-dasharray="138.2" stroke-dashoffset="138.2" transform="rotate(-90 26 26)"/>
+              </svg>
+            </div>
+            <p class="health-tip" id="health-tip">Cargá tus datos para ver el score</p>
+          </div>
+        </div>
+
+        <!-- Budget Overview Bar -->
+        <div class="section-block" id="budget-overview-block">
+          <div class="section-header">
+            <h3 class="section-title">Presupuesto del mes</h3>
+            <button class="section-link" onclick="navigate('presupuesto')">Ver todo</button>
+          </div>
+          <div id="budget-bars-container" class="budget-bars"></div>
+          <p class="empty-hint hidden" id="budget-empty">No configuraste presupuesto aún.<br><button class="link-btn" onclick="navigate('presupuesto')">Configurar ahora</button></p>
+        </div>
+
+        <!-- Quick Cards Grid -->
+        <div class="section-block">
+          <h3 class="section-title">Accesos rápidos</h3>
+          <div class="cards-grid">
+            <button class="nav-card" onclick="navigate('gastos')">
+              <div class="nav-card-icon nc-purple">
+                <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="5" width="18" height="13" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M2 9h18" stroke="currentColor" stroke-width="1.6"/><circle cx="6.5" cy="14" r="1" fill="currentColor"/></svg>
+              </div>
+              <span class="nav-card-label">Gastos</span>
+              <span class="nav-card-sub" id="nc-gastos">$0 este mes</span>
+            </button>
+            <button class="nav-card" onclick="navigate('ingresos')">
+              <div class="nav-card-icon nc-green">
+                <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 3v16M5 9l6-6 6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <span class="nav-card-label">Ingresos</span>
+              <span class="nav-card-sub" id="nc-ingresos">$0 este mes</span>
+            </button>
+            <button class="nav-card" onclick="navigate('super')">
+              <div class="nav-card-icon nc-blue">
+                <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 3h2l2.5 11h9l2.5-7H7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="18" r="1.2" fill="currentColor"/><circle cx="16" cy="18" r="1.2" fill="currentColor"/></svg>
+              </div>
+              <span class="nav-card-label">Súper</span>
+              <span class="nav-card-sub" id="nc-super">Sin lista activa</span>
+            </button>
+            <button class="nav-card" onclick="navigate('casa')">
+              <div class="nav-card-icon nc-amber">
+                <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 10.5L11 3L19 10.5V19H14v-5H8v5H3V10.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+              </div>
+              <span class="nav-card-label">Casa</span>
+              <span class="nav-card-sub" id="nc-casa">$0 este mes</span>
+            </button>
+            <button class="nav-card" onclick="navigate('presupuesto')">
+              <div class="nav-card-icon nc-coral">
+                <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.6"/><path d="M11 7v4l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              </div>
+              <span class="nav-card-label">Presupuesto</span>
+              <span class="nav-card-sub" id="nc-presupuesto">Sin configurar</span>
+            </button>
+            <button class="nav-card" onclick="navigate('recordatorios')">
+              <div class="nav-card-icon nc-pink">
+                <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2a7 7 0 0 1 7 7c0 4 1.5 5.5 1.5 5.5H3.5S5 13 5 9a7 7 0 0 1 7-7Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 18.5a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              </div>
+              <span class="nav-card-label">Recordatorios</span>
+              <span class="nav-card-sub" id="nc-recordatorios">Sin pendientes</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="section-block">
+          <div class="section-header">
+            <h3 class="section-title">Últimos movimientos</h3>
+            <button class="section-link" onclick="navigate('gastos')">Ver todos</button>
+          </div>
+          <div id="recent-list" class="tx-list">
+            <div class="empty-state">
+              <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="4" y="8" width="32" height="24" rx="4" stroke="var(--color-muted)" stroke-width="1.5"/><path d="M4 15h32" stroke="var(--color-muted)" stroke-width="1.5"/><path d="M10 22h8M10 26h5" stroke="var(--color-muted)" stroke-width="1.5" stroke-linecap="round"/></svg>
+              <p>Todavía no hay movimientos este mes</p>
+              <button class="btn-primary" onclick="openAddModal('gasto')">+ Agregar gasto</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Consejos IA -->
+        <div class="section-block" id="ai-tips-block">
+          <div class="section-header">
+            <h3 class="section-title">Consejos para vos</h3>
+          </div>
+          <div id="ai-tips-list" class="tips-list"></div>
+        </div>
+
+      </section>
+
+      <!-- GASTOS VIEW -->
+      <section id="view-gastos" class="view">
+        <div class="view-filters">
+          <div class="filter-chips" id="gastos-filter-chips">
+            <button class="chip active" data-cat="all">Todos</button>
+            <button class="chip" data-cat="Comida">Comida</button>
+            <button class="chip" data-cat="Transporte">Transporte</button>
+            <button class="chip" data-cat="Salud">Salud</button>
+            <button class="chip" data-cat="Ocio">Ocio</button>
+            <button class="chip" data-cat="Otros">Otros</button>
+          </div>
+        </div>
+        <div id="gastos-list" class="tx-list padded"></div>
+      </section>
+
+      <!-- INGRESOS VIEW -->
+      <section id="view-ingresos" class="view">
+        <div id="ingresos-list" class="tx-list padded"></div>
+      </section>
+
+      <!-- SUPER VIEW -->
+      <section id="view-super" class="view">
+        <div class="super-header-bar">
+          <div class="super-stats" id="super-stats">
+            <span id="super-checked-count">0 / 0 items</span>
+            <span class="super-total" id="super-total-price">$0.00 estimado</span>
+          </div>
+          <button class="btn-secondary" id="clear-checked-btn">Limpiar tildados</button>
+        </div>
+        <div id="super-list" class="super-list"></div>
+        <div class="super-add-row">
+          <input type="text" id="super-item-input" placeholder="Agregar producto..." class="super-input" />
+          <input type="number" id="super-price-input" placeholder="$" class="super-price-input" step="0.01" min="0" />
+          <button class="btn-add-item" id="super-add-btn" aria-label="Agregar">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 3v12M3 9h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <div class="super-history-section">
+          <div class="section-header">
+            <h3 class="section-title">Historial de compras</h3>
+          </div>
+          <div id="super-history-list" class="history-list"></div>
+        </div>
+      </section>
+
+      <!-- CASA VIEW -->
+      <section id="view-casa" class="view">
+        <div class="view-filters">
+          <div class="filter-chips" id="casa-filter-chips">
+            <button class="chip active" data-cat="all">Todos</button>
+            <button class="chip" data-cat="Luz">Luz</button>
+            <button class="chip" data-cat="Gas">Gas</button>
+            <button class="chip" data-cat="Agua">Agua</button>
+            <button class="chip" data-cat="Internet">Internet</button>
+            <button class="chip" data-cat="Arreglo">Arreglo</button>
+            <button class="chip" data-cat="Otros">Otros</button>
+          </div>
+        </div>
+        <div id="casa-list" class="tx-list padded"></div>
+      </section>
+
+      <!-- PRESUPUESTO VIEW -->
+      <section id="view-presupuesto" class="view">
+        <div class="presupuesto-section padded">
+          <p class="section-hint">Fijá un límite mensual para cada categoría y te avisamos cuando te estés acercando.</p>
+          <div id="presupuesto-items" class="budget-config-list"></div>
+          <button class="btn-secondary full-width mt-2" id="add-budget-category-btn">+ Agregar categoría</button>
+        </div>
+      </section>
+
+      <!-- RECORDATORIOS VIEW -->
+      <section id="view-recordatorios" class="view">
+        <div id="recordatorios-list" class="tx-list padded"></div>
+      </section>
+
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav" id="bottom-nav">
+      <button class="nav-btn active" data-view="dashboard" onclick="navigate('dashboard')" aria-label="Inicio">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 10.5L11 3L19 10.5V19H14v-5H8v5H3V10.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        <span>Inicio</span>
+      </button>
+      <button class="nav-btn" data-view="gastos" onclick="navigate('gastos')" aria-label="Gastos">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="5" width="18" height="13" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M2 9h18" stroke="currentColor" stroke-width="1.6"/><circle cx="6.5" cy="14" r="1" fill="currentColor"/></svg>
+        <span>Gastos</span>
+      </button>
+      <button class="nav-btn nav-btn-fab" onclick="openAddModal('gasto')" aria-label="Agregar">
+        <div class="fab-inner">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+        </div>
+      </button>
+      <button class="nav-btn" data-view="super" onclick="navigate('super')" aria-label="Supermercado">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 3h2l2.5 11h9l2.5-7H7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="18" r="1.2" fill="currentColor"/><circle cx="16" cy="18" r="1.2" fill="currentColor"/></svg>
+        <span>Súper</span>
+      </button>
+      <button class="nav-btn" data-view="ingresos" onclick="navigate('ingresos')" aria-label="Ingresos">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 3v16M5 9l6-6 6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Ingresos</span>
+      </button>
+    </nav>
+
+    <!-- ADD / EDIT MODAL -->
+    <div id="modal-overlay" class="modal-overlay hidden" onclick="closeModal(event)">
+      <div class="modal-sheet" id="modal-sheet">
+        <div class="modal-handle"></div>
+        <div class="modal-header">
+          <h3 class="modal-title" id="modal-title">Nuevo gasto</h3>
+          <button class="modal-close" onclick="closeModal()" aria-label="Cerrar">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <form id="transaction-form" class="modal-form" onsubmit="submitTransaction(event)">
+          <input type="hidden" id="edit-id" value="" />
+          <input type="hidden" id="tx-type" value="gasto" />
+
+          <div class="form-group">
+            <label class="form-label">Monto *</label>
+            <div class="amount-input-wrap">
+              <span class="currency-symbol">$</span>
+              <input type="number" id="tx-amount" class="form-input amount-input" placeholder="0.00" step="0.01" min="0" required />
+            </div>
+          </div>
+
+          <div class="form-group" id="group-categoria">
+            <label class="form-label">Categoría</label>
+            <div class="category-chips" id="category-chips-modal"></div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Descripción</label>
+            <input type="text" id="tx-desc" class="form-input" placeholder="¿En qué fue?" maxlength="80" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Fecha</label>
+            <input type="date" id="tx-date" class="form-input" required />
+          </div>
+
+          <!-- Foto de ticket -->
+          <div class="form-group" id="group-foto">
+            <label class="form-label">Foto del ticket (opcional)</label>
+            <div class="ticket-upload" id="ticket-upload-area">
+              <input type="file" id="ticket-file" accept="image/*" capture="environment" class="file-input-hidden" />
+              <div class="ticket-placeholder" id="ticket-placeholder" onclick="document.getElementById('ticket-file').click()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="2" y="4" width="20" height="16" rx="3" stroke="currentColor" stroke-width="1.5"/><circle cx="9" cy="10" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M2 16l5-5 4 4 3-3 5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>Sacar foto o elegir imagen</span>
+              </div>
+              <img id="ticket-preview" class="ticket-preview hidden" alt="Vista previa del ticket" />
+              <button type="button" id="ticket-remove" class="ticket-remove hidden" onclick="removeTicket()">Quitar foto</button>
+            </div>
+          </div>
+
+          <!-- Recordatorio fields -->
+          <div id="group-reminder" class="hidden">
+            <div class="form-group">
+              <label class="form-label">Nombre del pago</label>
+              <input type="text" id="reminder-name" class="form-input" placeholder="Ej: Luz, tarjeta, alquiler" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Fecha de vencimiento</label>
+              <input type="date" id="reminder-date" class="form-input" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Monto aproximado</label>
+              <div class="amount-input-wrap">
+                <span class="currency-symbol">$</span>
+                <input type="number" id="reminder-amount" class="form-input amount-input" placeholder="0.00" step="0.01" min="0" />
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary full-width" id="submit-btn">Guardar</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- Add Budget Category Modal -->
+    <div id="budget-modal-overlay" class="modal-overlay hidden" onclick="closeBudgetModal(event)">
+      <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <div class="modal-header">
+          <h3 class="modal-title">Configurar límite</h3>
+          <button class="modal-close" onclick="closeBudgetModal()" aria-label="Cerrar">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <form id="budget-form" class="modal-form" onsubmit="submitBudget(event)">
+          <input type="hidden" id="budget-edit-cat" value="" />
+          <div class="form-group">
+            <label class="form-label">Categoría</label>
+            <select id="budget-cat" class="form-input form-select">
+              <option value="">Seleccioná una categoría</option>
+              <option>Comida</option><option>Transporte</option><option>Salud</option>
+              <option>Ocio</option><option>Luz</option><option>Gas</option>
+              <option>Agua</option><option>Internet</option><option>Arreglo</option>
+              <option>Ropa</option><option>Educación</option><option>Otros</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Límite mensual ($)</label>
+            <div class="amount-input-wrap">
+              <span class="currency-symbol">$</span>
+              <input type="number" id="budget-limit" class="form-input amount-input" placeholder="0.00" step="0.01" min="0" required />
+            </div>
+          </div>
+          <button type="submit" class="btn-primary full-width">Guardar límite</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Image Viewer -->
+    <div id="img-viewer" class="img-viewer hidden" onclick="closeImgViewer()">
+      <img id="img-viewer-src" alt="Ticket" />
+      <button class="img-viewer-close" onclick="closeImgViewer()" aria-label="Cerrar">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 4l12 12M16 4L4 16" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+  </div>
+
+  <script src="db.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
