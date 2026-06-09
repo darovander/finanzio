@@ -60,6 +60,9 @@
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2a6 6 0 0 1 6 6c0 3.5 1.5 5 1.5 5h-15S4 11.5 4 8a6 6 0 0 1 6-6Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8.5 17a1.5 1.5 0 0 0 3 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
           <span class="notif-badge hidden" id="notif-badge">0</span>
         </button>
+        <button class="header-icon-btn" id="settings-btn" onclick="openSettingsModal()" aria-label="Configuración">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.22 4.22l1.42 1.42M14.36 14.36l1.42 1.42M4.22 15.78l1.42-1.42M14.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
       </div>
     </header>
 
@@ -333,9 +336,9 @@
             <div class="ticket-upload" id="ticket-upload-area">
               <input type="file" id="ticket-file" accept="image/*" capture="environment" class="file-input-hidden" />
               <div class="ticket-actions-row" id="ticket-actions-row">
-                <button type="button" class="ticket-action-btn ticket-scan-btn" onclick="scanTicket()">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M7 12h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-                  <span>Escanear ticket</span>
+                <button type="button" class="ticket-action-btn ticket-scan-btn" onclick="scanTicketAI()">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M19 16L19.7 18.3L22 19L19.7 19.7L19 22L18.3 19.7L16 19L18.3 18.3L19 16Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+                  <span>Escanear con IA</span>
                 </button>
                 <button type="button" class="ticket-action-btn ticket-photo-btn" onclick="document.getElementById('ticket-file').click()">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="2" y="6" width="20" height="14" rx="2.5" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="13" r="3.5" stroke="currentColor" stroke-width="1.6"/><path d="M8 6l1.5-3h5L16 6" stroke="currentColor" stroke-width="1.6"/></svg>
@@ -426,6 +429,64 @@
       <button class="img-viewer-close" onclick="closeImgViewer()" aria-label="Cerrar">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 4l12 12M16 4L4 16" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal-overlay" class="modal-overlay hidden" onclick="closeSettingsModal(event)">
+      <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <div class="modal-header">
+          <h3 class="modal-title">Configuración</h3>
+          <button class="modal-close" onclick="closeSettingsModal()" aria-label="Cerrar">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <div class="modal-form">
+          <div class="settings-section">
+            <h4 class="settings-section-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="vertical-align:-3px"><path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+              Escaneo con IA
+            </h4>
+            <p class="settings-hint">Para escanear tickets con inteligencia artificial necesitás una clave gratuita de Groq.</p>
+
+            <div id="api-key-not-set" class="api-status api-status-warn">
+              <span>⚠️ Sin configurar</span>
+            </div>
+            <div id="api-key-set" class="api-status api-status-ok hidden">
+              <span>✅ IA activada</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">API Key de Groq</label>
+              <input type="password" id="groq-api-key" class="form-input" placeholder="gsk_..." autocomplete="off" />
+            </div>
+
+            <div class="form-actions-row">
+              <button type="button" class="btn-secondary" onclick="testGroqKey()">Probar conexión</button>
+              <button type="button" class="btn-primary" onclick="saveGroqKey()">Guardar</button>
+            </div>
+
+            <button type="button" class="link-btn-block" id="show-instructions-btn" onclick="toggleInstructions()">
+              ¿Cómo conseguir la clave? (es gratis)
+            </button>
+
+            <div id="api-instructions" class="instructions-box hidden">
+              <p class="instructions-title">Paso a paso (2 minutos):</p>
+              <ol class="instructions-list">
+                <li>Entrá a <a href="https://console.groq.com" target="_blank" rel="noopener">console.groq.com</a> en tu navegador</li>
+                <li>Tocá <strong>Sign Up</strong> y entrá con tu Gmail (no pide tarjeta)</li>
+                <li>Una vez adentro, andá a <strong>API Keys</strong> en el menú izquierdo</li>
+                <li>Tocá <strong>Create API Key</strong>, ponele un nombre como "Finanzio"</li>
+                <li>Copiá la clave que empieza con <code>gsk_...</code></li>
+                <li>Volvé acá, pegala arriba y guardá</li>
+              </ol>
+              <p class="instructions-warn">⚠️ La clave se guarda solo en tu celu. No la compartas con nadie.</p>
+            </div>
+
+            <button type="button" class="link-btn-block danger" id="clear-key-btn" onclick="clearGroqKey()">Borrar clave guardada</button>
+          </div>
+        </div>
+      </div>
     </div>
 
   </div>

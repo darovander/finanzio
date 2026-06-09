@@ -730,6 +730,7 @@ function showTicketPreview() {
 }
 
 async function scanTicket() {
+  // Fallback Tesseract local
   if (typeof Tesseract === 'undefined') {
     showToast('Esperá unos segundos, cargando motor de escaneo...');
     return;
@@ -750,6 +751,250 @@ async function scanTicket() {
     reader.readAsDataURL(file);
   };
   input.click();
+}
+
+/* ===========================
+   GROQ AI VISION
+   =========================== */
+async function scanTicketAI() {
+  const apiKey = await getSetting('groqApiKey');
+  if (!apiKey) {
+    showToast('Configurá tu API key primero');
+    closeModal();
+    setTimeout(() => openSettingsModal(), 300);
+    return;
+  }
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.capture = 'environment';
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      ticketDataUrl = ev.target.result;
+      showTicketPreview();
+      await runGroqOCR(ticketDataUrl, apiKey);
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+async function runGroqOCR(imageDataUrl, apiKey) {
+  const statusEl = document.getElementById('ocr-status');
+  const resultEl = document.getElementById('ocr-result');
+  const titleEl = document.getElementById('ocr-title');
+  const progressEl = document.getElementById('ocr-progress');
+
+  resultEl.classList.add('hidden');
+  statusEl.classList.remove('hidden');
+  titleEl.textContent = 'Analizando ticket con IA...';
+  progressEl.textContent = 'Conectando con Groq';
+
+  try {
+    const compressedImage = await compressImage(imageDataUrl, 1024, 0.8);
+    progressEl.textContent = 'Enviando imagen...';
+
+    const prompt = `Analizá esta imagen de un ticket o comprobante de compra argentino. Extraé la información y respondé ÚNICAMENTE con un JSON válido (sin texto adicional, sin markdown, sin explicaciones).
+
+Formato exacto:
+{
+  "monto_total": 1234.56,
+  "comercio": "Nombre del comercio",
+  "fecha": "2025-06-09",
+  "categoria_sugerida": "Comida",
+  "items": ["Producto 1", "Producto 2"]
+}
+
+Reglas:
+- monto_total debe ser el TOTAL FINAL del ticket (no subtotal ni items individuales), como número decimal sin símbolos
+- comercio: nombre que aparece arriba del ticket o más prominente
+- fecha en formato YYYY-MM-DD; si no la encontrás, usá la de hoy
+- categoria_sugerida debe ser UNA de: Comida, Transporte, Salud, Ocio, Ropa, Educación, Luz, Gas, Agua, Internet, Arreglo, Otros
+- items: lista corta de los productos principales (máximo 5, nombres cortos)
+- Si algún dato no se puede leer, usá null para ese campo (excepto monto_total)
+- Respondé SOLO el JSON, nada más`;
+
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: prompt },
+              { type: 'image_url', image_url: { url: compressedImage } }
+            ]
+          }
+        ],
+        temperature: 0.1,
+        max_tokens: 500,
+        response_format: { type: 'json_object' }
+      })
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`API ${response.status}: ${errText.slice(0, 200)}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content;
+    if (!content) throw new Error('Respuesta vacía de Groq');
+
+    let parsed;
+    try {
+      parsed = JSON.parse(content);
+    } catch {
+      const match = content.match(/\{[\s\S]*\}/);
+      if (match) parsed = JSON.parse(match[0]);
+      else throw new Error('No se pudo parsear la respuesta');
+    }
+
+    statusEl.classList.add('hidden');
+
+    if (parsed.monto_total && !isNaN(parsed.monto_total)) {
+      const amount = parseFloat(parsed.monto_total);
+      document.getElementById('tx-amount').value = amount.toFixed(2);
+      document.getElementById('ocr-result-amount').textContent = formatCurrency(amount);
+      resultEl.classList.remove('hidden');
+
+      const descField = document.getElementById('tx-desc');
+      if (!descField.value && parsed.comercio) {
+        descField.value = parsed.comercio.substring(0, 80);
+      }
+
+      if (parsed.fecha && /^\d{4}-\d{2}-\d{2}$/.test(parsed.fecha)) {
+        document.getElementById('tx-date').value = parsed.fecha;
+      }
+
+      if (parsed.categoria_sugerida && !selectedCategory) {
+        const type = document.getElementById('tx-type').value;
+        const validCats = type === 'casa' ? CASA_CATS : GASTO_CATS;
+        if (validCats.includes(parsed.categoria_sugerida)) {
+          selectCategory(parsed.categoria_sugerida);
+        }
+      }
+
+      showToast(`✨ IA detectó ${formatCurrency(amount)}`);
+    } else {
+      showToast('No se pudo detectar el importe. Cargalo a mano.');
+    }
+  } catch (err) {
+    statusEl.classList.add('hidden');
+    console.error('Groq error:', err);
+    if (err.message.includes('401')) {
+      showToast('❌ API key inválida. Revisá la configuración.');
+    } else if (err.message.includes('429')) {
+      showToast('⏱️ Límite de uso alcanzado. Probá en un minuto.');
+    } else if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+      showToast('❌ Sin internet. Probá "Solo foto" o revisá tu conexión.');
+    } else {
+      showToast('Error al analizar. Intentá de nuevo o cargá a mano.');
+    }
+  }
+}
+
+async function compressImage(dataUrl, maxWidth = 1024, quality = 0.85) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img;
+      if (width > maxWidth) {
+        height = (height * maxWidth) / width;
+        width = maxWidth;
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = reject;
+    img.src = dataUrl;
+  });
+}
+
+/* ===========================
+   SETTINGS / API KEY
+   =========================== */
+async function openSettingsModal() {
+  const key = await getSetting('groqApiKey');
+  const input = document.getElementById('groq-api-key');
+  if (key) {
+    input.value = key;
+    document.getElementById('api-key-set').classList.remove('hidden');
+    document.getElementById('api-key-not-set').classList.add('hidden');
+    document.getElementById('clear-key-btn').classList.remove('hidden');
+  } else {
+    input.value = '';
+    document.getElementById('api-key-set').classList.add('hidden');
+    document.getElementById('api-key-not-set').classList.remove('hidden');
+    document.getElementById('clear-key-btn').classList.add('hidden');
+  }
+  document.getElementById('api-instructions').classList.add('hidden');
+  document.getElementById('settings-modal-overlay').classList.remove('hidden');
+}
+
+function closeSettingsModal(e) {
+  if (e && e.target !== document.getElementById('settings-modal-overlay')) return;
+  document.getElementById('settings-modal-overlay').classList.add('hidden');
+}
+
+function toggleInstructions() {
+  const box = document.getElementById('api-instructions');
+  box.classList.toggle('hidden');
+}
+
+async function saveGroqKey() {
+  const key = document.getElementById('groq-api-key').value.trim();
+  if (!key) { showToast('Pegá una API key primero'); return; }
+  if (!key.startsWith('gsk_')) {
+    showToast('La key debe empezar con "gsk_"');
+    return;
+  }
+  await setSetting('groqApiKey', key);
+  document.getElementById('api-key-set').classList.remove('hidden');
+  document.getElementById('api-key-not-set').classList.add('hidden');
+  document.getElementById('clear-key-btn').classList.remove('hidden');
+  showToast('✅ Clave guardada');
+}
+
+async function testGroqKey() {
+  const key = document.getElementById('groq-api-key').value.trim();
+  if (!key) { showToast('Pegá la key primero'); return; }
+  showToast('Probando conexión...');
+  try {
+    const response = await fetch('https://api.groq.com/openai/v1/models', {
+      headers: { 'Authorization': `Bearer ${key}` }
+    });
+    if (response.ok) {
+      showToast('✅ Conexión OK — guardá la clave');
+    } else if (response.status === 401) {
+      showToast('❌ Clave inválida');
+    } else {
+      showToast(`Error ${response.status}`);
+    }
+  } catch (err) {
+    showToast('❌ Sin internet o error de red');
+  }
+}
+
+async function clearGroqKey() {
+  if (!confirm('¿Borrar la API key guardada? Vas a tener que pegarla de nuevo para usar IA.')) return;
+  await setSetting('groqApiKey', null);
+  document.getElementById('groq-api-key').value = '';
+  document.getElementById('api-key-set').classList.add('hidden');
+  document.getElementById('api-key-not-set').classList.remove('hidden');
+  document.getElementById('clear-key-btn').classList.add('hidden');
+  showToast('Clave eliminada');
 }
 
 async function runOCR(imageDataUrl) {
