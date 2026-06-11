@@ -729,6 +729,21 @@ function showTicketPreview() {
   document.getElementById('ticket-remove').classList.remove('hidden');
 }
 
+/* ===========================
+   ACTION SHEET (FAB +)
+   =========================== */
+function openActionSheet() {
+  document.getElementById('action-sheet-overlay').classList.remove('hidden');
+}
+function closeActionSheet(e) {
+  if (e && e.target !== document.getElementById('action-sheet-overlay')) return;
+  document.getElementById('action-sheet-overlay').classList.add('hidden');
+}
+function actionSelect(type) {
+  closeActionSheet();
+  setTimeout(() => openAddModal(type), 200);
+}
+
 async function scanTicket() {
   // Fallback Tesseract local
   if (typeof Tesseract === 'undefined') {

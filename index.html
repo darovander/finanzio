@@ -278,7 +278,7 @@
         <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="5" width="18" height="13" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M2 9h18" stroke="currentColor" stroke-width="1.6"/><circle cx="6.5" cy="14" r="1" fill="currentColor"/></svg>
         <span>Gastos</span>
       </button>
-      <button class="nav-btn nav-btn-fab" onclick="openAddModal('gasto')" aria-label="Agregar">
+      <button class="nav-btn nav-btn-fab" onclick="openActionSheet()" aria-label="Agregar">
         <div class="fab-inner">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
         </div>
@@ -429,6 +429,53 @@
       <button class="img-viewer-close" onclick="closeImgViewer()" aria-label="Cerrar">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 4l12 12M16 4L4 16" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
+    </div>
+
+    <!-- Action Sheet (+ button) -->
+    <div id="action-sheet-overlay" class="modal-overlay hidden" onclick="closeActionSheet(event)">
+      <div class="action-sheet">
+        <div class="modal-handle"></div>
+        <p class="action-sheet-title">¿Qué querés agregar?</p>
+        <div class="action-options">
+          <button class="action-option" onclick="actionSelect('gasto')">
+            <div class="action-icon nc-purple">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="5" width="18" height="13" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M2 9h18" stroke="currentColor" stroke-width="1.6"/><circle cx="6.5" cy="14" r="1" fill="currentColor"/></svg>
+            </div>
+            <div class="action-text">
+              <span class="action-label">Gasto</span>
+              <span class="action-sub">Comida, transporte, salud, etc.</span>
+            </div>
+          </button>
+          <button class="action-option" onclick="actionSelect('ingreso')">
+            <div class="action-icon nc-green">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 3v16M5 9l6-6 6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="action-text">
+              <span class="action-label">Ingreso</span>
+              <span class="action-sub">Sueldo, ventas, freelance</span>
+            </div>
+          </button>
+          <button class="action-option" onclick="actionSelect('casa')">
+            <div class="action-icon nc-amber">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 10.5L11 3L19 10.5V19H14v-5H8v5H3V10.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="action-text">
+              <span class="action-label">Casa</span>
+              <span class="action-sub">Luz, gas, agua, arreglos</span>
+            </div>
+          </button>
+          <button class="action-option" onclick="actionSelect('recordatorio')">
+            <div class="action-icon nc-pink">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2a7 7 0 0 1 7 7c0 4 1.5 5.5 1.5 5.5H3.5S5 13 5 9a7 7 0 0 1 7-7Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 18.5a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </div>
+            <div class="action-text">
+              <span class="action-label">Recordatorio</span>
+              <span class="action-sub">Pago o vencimiento futuro</span>
+            </div>
+          </button>
+        </div>
+        <button class="action-cancel" onclick="closeActionSheet()">Cancelar</button>
+      </div>
     </div>
 
     <!-- Settings Modal -->
