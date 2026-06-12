@@ -1021,14 +1021,20 @@ function toggleInstructions() {
 async function saveGroqKey() {
   const key = document.getElementById('groq-api-key').value.trim();
   if (!key) { showToast('Pegá una API key primero'); return; }
-  if (key.length < 20) {
-    showToast('La key parece muy corta, verificala'); return;
+  if (key.length < 20) { showToast('La key parece muy corta, verificala'); return; }
+  try {
+    await setSetting('groqApiKey', key);
+    // Verificar que quedó guardada
+    const check = await getSetting('groqApiKey');
+    if (check !== key) throw new Error('Verificación fallida');
+    document.getElementById('api-key-set').classList.remove('hidden');
+    document.getElementById('api-key-not-set').classList.add('hidden');
+    document.getElementById('clear-key-btn').classList.remove('hidden');
+    showToast('✅ Clave guardada correctamente');
+  } catch (e) {
+    console.error('Error guardando key:', e);
+    showToast('❌ Error al guardar. Intentá de nuevo.');
   }
-  await setSetting('groqApiKey', key);
-  document.getElementById('api-key-set').classList.remove('hidden');
-  document.getElementById('api-key-not-set').classList.add('hidden');
-  document.getElementById('clear-key-btn').classList.remove('hidden');
-  showToast('✅ Clave guardada correctamente');
 }
 
 async function testGroqKey() {
