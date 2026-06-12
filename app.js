@@ -824,9 +824,9 @@ async function scanTicket() {
 async function scanTicketAI() {
   const apiKey = await getSetting('groqApiKey');
   if (!apiKey) {
-    showToast('Configurá tu API key primero');
+    showToast('Configurá tu API key en Ajustes ⚙️');
     closeModal();
-    setTimeout(() => openSettingsModal(), 300);
+    setTimeout(() => navigate('ajustes'), 300);
     return;
   }
   const input = document.createElement('input');
@@ -1021,15 +1021,14 @@ function toggleInstructions() {
 async function saveGroqKey() {
   const key = document.getElementById('groq-api-key').value.trim();
   if (!key) { showToast('Pegá una API key primero'); return; }
-  if (!key.startsWith('gsk_')) {
-    showToast('La key debe empezar con "gsk_"');
-    return;
+  if (key.length < 20) {
+    showToast('La key parece muy corta, verificala'); return;
   }
   await setSetting('groqApiKey', key);
   document.getElementById('api-key-set').classList.remove('hidden');
   document.getElementById('api-key-not-set').classList.add('hidden');
   document.getElementById('clear-key-btn').classList.remove('hidden');
-  showToast('✅ Clave guardada');
+  showToast('✅ Clave guardada correctamente');
 }
 
 async function testGroqKey() {
@@ -1053,8 +1052,8 @@ async function testGroqKey() {
 }
 
 async function clearGroqKey() {
-  if (!confirm('¿Borrar la API key guardada? Vas a tener que pegarla de nuevo para usar IA.')) return;
-  await setSetting('groqApiKey', null);
+  if (!confirm('¿Borrar la API key guardada?')) return;
+  await dbDelete('settings', 'groqApiKey');
   document.getElementById('groq-api-key').value = '';
   document.getElementById('api-key-set').classList.add('hidden');
   document.getElementById('api-key-not-set').classList.remove('hidden');
@@ -1331,10 +1330,28 @@ function getTopCategory(txs) {
 /* ===========================
    AJUSTES — render
    =========================== */
-function renderAjustes() {
+async function renderAjustes() {
   renderCatList('gasto',   'cat-list-gasto',   gastoCats);
   renderCatList('casa',    'cat-list-casa',     casaCats);
   renderCatList('ingreso', 'cat-list-ingreso',  ingresoCats);
+
+  // Cargar estado de la API key en la vista
+  const key = await getSetting('groqApiKey');
+  const inputEl    = document.getElementById('groq-api-key');
+  const setEl      = document.getElementById('api-key-set');
+  const notSetEl   = document.getElementById('api-key-not-set');
+  const clearBtn   = document.getElementById('clear-key-btn');
+  if (key) {
+    if (inputEl)  inputEl.value = key;
+    if (setEl)    setEl.classList.remove('hidden');
+    if (notSetEl) notSetEl.classList.add('hidden');
+    if (clearBtn) clearBtn.classList.remove('hidden');
+  } else {
+    if (inputEl)  inputEl.value = '';
+    if (setEl)    setEl.classList.add('hidden');
+    if (notSetEl) notSetEl.classList.remove('hidden');
+    if (clearBtn) clearBtn.classList.add('hidden');
+  }
 }
 
 function renderCatList(type, containerId, cats) {
