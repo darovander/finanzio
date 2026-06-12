@@ -61,7 +61,7 @@
           <span class="notif-badge hidden" id="notif-badge">0</span>
         </button>
         <button class="header-icon-btn" id="settings-btn" onclick="navigate('ajustes')" aria-label="Ajustes">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" stroke="currentColor" stroke-width="1.5"/><path d="M16.4 12.5a1.4 1.4 0 0 0 .28 1.54l.05.05a1.7 1.7 0 1 1-2.4 2.4l-.05-.05a1.4 1.4 0 0 0-1.54-.28 1.4 1.4 0 0 0-.85 1.28v.14a1.7 1.7 0 0 1-3.4 0v-.07a1.4 1.4 0 0 0-.92-1.28 1.4 1.4 0 0 0-1.54.28l-.05.05a1.7 1.7 0 1 1-2.4-2.4l.05-.05a1.4 1.4 0 0 0 .28-1.54 1.4 1.4 0 0 0-1.28-.85h-.14a1.7 1.7 0 0 1 0-3.4h.07a1.4 1.4 0 0 0 1.28-.92 1.4 1.4 0 0 0-.28-1.54l-.05-.05a1.7 1.7 0 1 1 2.4-2.4l.05.05a1.4 1.4 0 0 0 1.54.28h.06a1.4 1.4 0 0 0 .85-1.28v-.14a1.7 1.7 0 0 1 3.4 0v.07a1.4 1.4 0 0 0 .85 1.28h.06a1.4 1.4 0 0 0 1.54-.28l.05-.05a1.7 1.7 0 1 1 2.4 2.4l-.05.05a1.4 1.4 0 0 0-.28 1.54v.06a1.4 1.4 0 0 0 1.28.85h.14a1.7 1.7 0 0 1 0 3.4h-.07a1.4 1.4 0 0 0-1.28.85Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.22 4.22l1.42 1.42M14.36 14.36l1.42 1.42M4.22 15.78l1.42-1.42M14.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         </button>
       </div>
     </header>
@@ -268,35 +268,84 @@
 
       <!-- AJUSTES VIEW -->
       <section id="view-ajustes" class="view">
-        <div class="presupuesto-section padded">
-          <div class="section-block">
-            <div class="section-header"><h3 class="section-title">Datos</h3></div>
-            <p class="section-hint">Exportá una copia de seguridad con todos tus datos o restaurala en otro dispositivo.</p>
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <button class="btn-secondary" id="export-data-btn">Exportar datos</button>
-              <button class="btn-secondary" id="import-data-btn">Importar datos</button>
-            </div>
-            <input type="file" id="import-file-input" accept="application/json" class="hidden" />
-          </div>
 
-          <div class="section-block">
-            <div class="section-header"><h3 class="section-title">Categorías de Gastos</h3></div>
-            <div id="cat-list-gasto" class="budget-config-list"></div>
-            <button class="btn-secondary full-width mt-2 add-cat-btn" data-type="gasto">+ Agregar categoría</button>
+        <!-- Bloque Datos -->
+        <div class="section-block">
+          <div class="section-header">
+            <h3 class="section-title">💾 Datos</h3>
           </div>
-
-          <div class="section-block">
-            <div class="section-header"><h3 class="section-title">Categorías de Casa &amp; Hogar</h3></div>
-            <div id="cat-list-casa" class="budget-config-list"></div>
-            <button class="btn-secondary full-width mt-2 add-cat-btn" data-type="casa">+ Agregar categoría</button>
+          <p class="section-hint">Exportá un backup de todos tus datos o importá uno guardado.</p>
+          <div style="display:flex;gap:10px">
+            <button id="export-data-btn" class="btn-secondary" style="flex:1">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="vertical-align:-2px;margin-right:4px"><path d="M8 2v8M5 7l3 3 3-3M2 11v1.5A1.5 1.5 0 0 0 3.5 14h9A1.5 1.5 0 0 0 14 12.5V11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Exportar
+            </button>
+            <button id="import-data-btn" class="btn-secondary" style="flex:1">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="vertical-align:-2px;margin-right:4px"><path d="M8 10V2M5 5l3-3 3 3M2 11v1.5A1.5 1.5 0 0 0 3.5 14h9A1.5 1.5 0 0 0 14 12.5V11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Importar
+            </button>
           </div>
-
-          <div class="section-block">
-            <div class="section-header"><h3 class="section-title">Categorías de Ingresos</h3></div>
-            <div id="cat-list-ingreso" class="budget-config-list"></div>
-            <button class="btn-secondary full-width mt-2 add-cat-btn" data-type="ingreso">+ Agregar categoría</button>
-          </div>
+          <input type="file" id="import-file-input" accept="application/json" class="hidden" />
         </div>
+
+        <!-- Bloque Categorías Gastos -->
+        <div class="section-block">
+          <div class="section-header">
+            <h3 class="section-title">💸 Categorías de Gastos</h3>
+          </div>
+          <div id="cat-list-gasto" class="budget-config-list"></div>
+          <button id="add-cat-gasto-btn" class="btn-secondary full-width mt-2">+ Agregar categoría</button>
+        </div>
+
+        <!-- Bloque Categorías Casa -->
+        <div class="section-block">
+          <div class="section-header">
+            <h3 class="section-title">🏠 Categorías de Casa</h3>
+          </div>
+          <div id="cat-list-casa" class="budget-config-list"></div>
+          <button id="add-cat-casa-btn" class="btn-secondary full-width mt-2">+ Agregar categoría</button>
+        </div>
+
+        <!-- Bloque Categorías Ingresos -->
+        <div class="section-block">
+          <div class="section-header">
+            <h3 class="section-title">💵 Categorías de Ingresos</h3>
+          </div>
+          <div id="cat-list-ingreso" class="budget-config-list"></div>
+          <button id="add-cat-ingreso-btn" class="btn-secondary full-width mt-2">+ Agregar categoría</button>
+        </div>
+
+        <!-- API Key -->
+        <div class="section-block">
+          <div class="section-header">
+            <h3 class="section-title">✨ Escaneo con IA</h3>
+          </div>
+          <p class="section-hint">Configurá tu clave de Groq para escanear tickets automáticamente.</p>
+          <div id="api-key-not-set" class="api-status api-status-warn">⚠️ Sin configurar</div>
+          <div id="api-key-set" class="api-status api-status-ok hidden">✅ IA activada</div>
+          <div class="form-group" style="margin-top:12px">
+            <label class="form-label">API Key de Groq</label>
+            <input type="password" id="groq-api-key" class="form-input" placeholder="gsk_..." autocomplete="off" />
+          </div>
+          <div class="form-actions-row" style="margin-top:8px">
+            <button type="button" class="btn-secondary" onclick="testGroqKey()">Probar</button>
+            <button type="button" class="btn-primary" onclick="saveGroqKey()">Guardar</button>
+          </div>
+          <button type="button" class="link-btn-block" onclick="toggleInstructions()">¿Cómo conseguir la clave? (gratis)</button>
+          <div id="api-instructions" class="instructions-box hidden">
+            <p class="instructions-title">Paso a paso (2 minutos):</p>
+            <ol class="instructions-list">
+              <li>Entrá a <a href="https://console.groq.com" target="_blank" rel="noopener">console.groq.com</a></li>
+              <li>Tocá <strong>Sign Up</strong> con tu Gmail (sin tarjeta)</li>
+              <li>Andá a <strong>API Keys</strong> → <strong>Create API Key</strong></li>
+              <li>Copiá la clave que empieza con <code>gsk_...</code></li>
+              <li>Pegala arriba y guardá</li>
+            </ol>
+            <p class="instructions-warn">⚠️ La clave se guarda solo en tu celu. No la compartas.</p>
+          </div>
+          <button type="button" class="link-btn-block danger" id="clear-key-btn" onclick="clearGroqKey()">Borrar clave guardada</button>
+        </div>
+
       </section>
 
     </main>
@@ -311,7 +360,7 @@
         <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="5" width="18" height="13" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M2 9h18" stroke="currentColor" stroke-width="1.6"/><circle cx="6.5" cy="14" r="1" fill="currentColor"/></svg>
         <span>Gastos</span>
       </button>
-      <button class="nav-btn nav-btn-fab" onclick="openAddModal('gasto')" aria-label="Agregar">
+      <button class="nav-btn nav-btn-fab" onclick="openActionSheet()" aria-label="Agregar">
         <div class="fab-inner">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
         </div>
@@ -369,9 +418,9 @@
             <div class="ticket-upload" id="ticket-upload-area">
               <input type="file" id="ticket-file" accept="image/*" capture="environment" class="file-input-hidden" />
               <div class="ticket-actions-row" id="ticket-actions-row">
-                <button type="button" class="ticket-action-btn ticket-scan-btn" onclick="scanTicket()">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M7 12h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-                  <span>Escanear ticket</span>
+                <button type="button" class="ticket-action-btn ticket-scan-btn" onclick="scanTicketAI()">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M19 16L19.7 18.3L22 19L19.7 19.7L19 22L18.3 19.7L16 19L18.3 18.3L19 16Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+                  <span>Escanear con IA</span>
                 </button>
                 <button type="button" class="ticket-action-btn ticket-photo-btn" onclick="document.getElementById('ticket-file').click()">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="2" y="6" width="20" height="14" rx="2.5" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="13" r="3.5" stroke="currentColor" stroke-width="1.6"/><path d="M8 6l1.5-3h5L16 6" stroke="currentColor" stroke-width="1.6"/></svg>
@@ -438,6 +487,10 @@
             <label class="form-label">Categoría</label>
             <select id="budget-cat" class="form-input form-select">
               <option value="">Seleccioná una categoría</option>
+              <option>Comida</option><option>Transporte</option><option>Salud</option>
+              <option>Ocio</option><option>Luz</option><option>Gas</option>
+              <option>Agua</option><option>Internet</option><option>Arreglo</option>
+              <option>Ropa</option><option>Educación</option><option>Otros</option>
             </select>
           </div>
           <div class="form-group">
@@ -452,12 +505,67 @@
       </div>
     </div>
 
-    <!-- Category Add/Edit Modal -->
+    <!-- Image Viewer -->
+    <div id="img-viewer" class="img-viewer hidden" onclick="closeImgViewer()">
+      <img id="img-viewer-src" alt="Ticket" />
+      <button class="img-viewer-close" onclick="closeImgViewer()" aria-label="Cerrar">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 4l12 12M16 4L4 16" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <!-- Action Sheet (+ button) -->
+    <div id="action-sheet-overlay" class="modal-overlay hidden" onclick="closeActionSheet(event)">
+      <div class="action-sheet">
+        <div class="modal-handle"></div>
+        <p class="action-sheet-title">¿Qué querés agregar?</p>
+        <div class="action-options">
+          <button class="action-option" onclick="actionSelect('gasto')">
+            <div class="action-icon nc-purple">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="5" width="18" height="13" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M2 9h18" stroke="currentColor" stroke-width="1.6"/><circle cx="6.5" cy="14" r="1" fill="currentColor"/></svg>
+            </div>
+            <div class="action-text">
+              <span class="action-label">Gasto</span>
+              <span class="action-sub">Comida, transporte, salud, etc.</span>
+            </div>
+          </button>
+          <button class="action-option" onclick="actionSelect('ingreso')">
+            <div class="action-icon nc-green">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 3v16M5 9l6-6 6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="action-text">
+              <span class="action-label">Ingreso</span>
+              <span class="action-sub">Sueldo, ventas, freelance</span>
+            </div>
+          </button>
+          <button class="action-option" onclick="actionSelect('casa')">
+            <div class="action-icon nc-amber">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 10.5L11 3L19 10.5V19H14v-5H8v5H3V10.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="action-text">
+              <span class="action-label">Casa</span>
+              <span class="action-sub">Luz, gas, agua, arreglos</span>
+            </div>
+          </button>
+          <button class="action-option" onclick="actionSelect('recordatorio')">
+            <div class="action-icon nc-pink">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2a7 7 0 0 1 7 7c0 4 1.5 5.5 1.5 5.5H3.5S5 13 5 9a7 7 0 0 1 7-7Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 18.5a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </div>
+            <div class="action-text">
+              <span class="action-label">Recordatorio</span>
+              <span class="action-sub">Pago o vencimiento futuro</span>
+            </div>
+          </button>
+        </div>
+        <button class="action-cancel" onclick="closeActionSheet()">Cancelar</button>
+      </div>
+    </div>
+
+    <!-- Category Modal -->
     <div id="category-modal-overlay" class="modal-overlay hidden" onclick="closeCategoryModal(event)">
       <div class="modal-sheet">
         <div class="modal-handle"></div>
         <div class="modal-header">
-          <h3 class="modal-title" id="category-modal-title">Nueva categoría</h3>
+          <h3 class="modal-title" id="cat-modal-title">Nueva categoría</h3>
           <button class="modal-close" onclick="closeCategoryModal()" aria-label="Cerrar">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
           </button>
@@ -467,23 +575,73 @@
           <input type="hidden" id="cat-edit-name" value="" />
           <div class="form-group">
             <label class="form-label">Ícono (emoji)</label>
-            <input type="text" id="cat-icon-input" class="form-input" placeholder="Ej: 🛒" maxlength="4" required />
+            <input type="text" id="cat-icon-input" class="form-input" placeholder="Ej: 🛒" maxlength="4" style="font-size:24px;text-align:center" />
           </div>
           <div class="form-group">
             <label class="form-label">Nombre</label>
-            <input type="text" id="cat-name-input" class="form-input" placeholder="Ej: Mascotas" maxlength="24" required />
+            <input type="text" id="cat-name-input" class="form-input" placeholder="Ej: Mascota" maxlength="30" required />
           </div>
-          <button type="submit" class="btn-primary full-width">Guardar categoría</button>
+          <button type="submit" class="btn-primary full-width">Guardar</button>
         </form>
       </div>
     </div>
 
-    <!-- Image Viewer -->
-    <div id="img-viewer" class="img-viewer hidden" onclick="closeImgViewer()">
-      <img id="img-viewer-src" alt="Ticket" />
-      <button class="img-viewer-close" onclick="closeImgViewer()" aria-label="Cerrar">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 4l12 12M16 4L4 16" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
-      </button>
+    <!-- Settings Modal (API Key - legacy, now in Ajustes view) -->
+    <div id="settings-modal-overlay" class="modal-overlay hidden" onclick="closeSettingsModal(event)">
+      <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <div class="modal-header">
+          <h3 class="modal-title">Configuración</h3>
+          <button class="modal-close" onclick="closeSettingsModal()" aria-label="Cerrar">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <div class="modal-form">
+          <div class="settings-section">
+            <h4 class="settings-section-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="vertical-align:-3px"><path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+              Escaneo con IA
+            </h4>
+            <p class="settings-hint">Para escanear tickets con inteligencia artificial necesitás una clave gratuita de Groq.</p>
+
+            <div id="api-key-not-set" class="api-status api-status-warn">
+              <span>⚠️ Sin configurar</span>
+            </div>
+            <div id="api-key-set" class="api-status api-status-ok hidden">
+              <span>✅ IA activada</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">API Key de Groq</label>
+              <input type="password" id="groq-api-key" class="form-input" placeholder="gsk_..." autocomplete="off" />
+            </div>
+
+            <div class="form-actions-row">
+              <button type="button" class="btn-secondary" onclick="testGroqKey()">Probar conexión</button>
+              <button type="button" class="btn-primary" onclick="saveGroqKey()">Guardar</button>
+            </div>
+
+            <button type="button" class="link-btn-block" id="show-instructions-btn" onclick="toggleInstructions()">
+              ¿Cómo conseguir la clave? (es gratis)
+            </button>
+
+            <div id="api-instructions" class="instructions-box hidden">
+              <p class="instructions-title">Paso a paso (2 minutos):</p>
+              <ol class="instructions-list">
+                <li>Entrá a <a href="https://console.groq.com" target="_blank" rel="noopener">console.groq.com</a> en tu navegador</li>
+                <li>Tocá <strong>Sign Up</strong> y entrá con tu Gmail (no pide tarjeta)</li>
+                <li>Una vez adentro, andá a <strong>API Keys</strong> en el menú izquierdo</li>
+                <li>Tocá <strong>Create API Key</strong>, ponele un nombre como "Finanzio"</li>
+                <li>Copiá la clave que empieza con <code>gsk_...</code></li>
+                <li>Volvé acá, pegala arriba y guardá</li>
+              </ol>
+              <p class="instructions-warn">⚠️ La clave se guarda solo en tu celu. No la compartas con nadie.</p>
+            </div>
+
+            <button type="button" class="link-btn-block danger" id="clear-key-btn" onclick="clearGroqKey()">Borrar clave guardada</button>
+          </div>
+        </div>
+      </div>
     </div>
 
   </div>

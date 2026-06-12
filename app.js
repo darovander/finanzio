@@ -18,25 +18,30 @@ let gastosCatFilter = 'all';
 let casaCatFilter = 'all';
 let deferredInstall = null;
 
+// Categorías con defaults
 const DEFAULT_GASTO_CATS = [
-  { name: 'Comida', icon: '🍔' }, { name: 'Transporte', icon: '🚗' },
-  { name: 'Salud', icon: '💊' }, { name: 'Ocio', icon: '🎮' },
-  { name: 'Ropa', icon: '👕' }, { name: 'Educación', icon: '📚' },
-  { name: 'Otros', icon: '💸' },
+  {name:'Comida',icon:'🍔'},{name:'Transporte',icon:'🚗'},{name:'Salud',icon:'💊'},
+  {name:'Ocio',icon:'🎮'},{name:'Ropa',icon:'👕'},{name:'Educación',icon:'📚'},
+  {name:'Otros',icon:'💸'}
 ];
 const DEFAULT_CASA_CATS = [
-  { name: 'Luz', icon: '💡' }, { name: 'Gas', icon: '🔥' },
-  { name: 'Agua', icon: '💧' }, { name: 'Internet', icon: '📡' },
-  { name: 'Arreglo', icon: '🔧' }, { name: 'Otros', icon: '🏠' },
+  {name:'Luz',icon:'💡'},{name:'Gas',icon:'🔥'},{name:'Agua',icon:'💧'},
+  {name:'Internet',icon:'📡'},{name:'Arreglo',icon:'🔧'},{name:'Otros',icon:'🏠'}
 ];
 const DEFAULT_INGRESO_CATS = [
-  { name: 'Sueldo', icon: '💼' }, { name: 'Freelance', icon: '💻' },
-  { name: 'Venta', icon: '🏷️' }, { name: 'Otro ingreso', icon: '💵' },
+  {name:'Sueldo',icon:'💼'},{name:'Freelance',icon:'💻'},
+  {name:'Venta',icon:'🏷️'},{name:'Otro ingreso',icon:'💵'}
 ];
-let gastoCats = DEFAULT_GASTO_CATS;
-let casaCats = DEFAULT_CASA_CATS;
-let ingresoCats = DEFAULT_INGRESO_CATS;
+
+let gastoCats = [...DEFAULT_GASTO_CATS];
+let casaCats  = [...DEFAULT_CASA_CATS];
+let ingresoCats = [...DEFAULT_INGRESO_CATS];
 let catIconMap = {};
+
+function rebuildCatIconMap() {
+  catIconMap = {};
+  [...gastoCats, ...casaCats, ...ingresoCats].forEach(c => { catIconMap[c.name] = c.icon; });
+}
 
 /* ===========================
    INIT
@@ -45,6 +50,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   applyTheme(await getSetting('theme', 'auto'));
   await loadAll();
   await loadCategories();
+  rebuildCatIconMap();
   setupThemeToggle();
   setupInstallBanner();
   setupDateDefault();
@@ -59,34 +65,24 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
+async function loadCategories() {
+  const g = await getSetting('cat_gasto');
+  const c = await getSetting('cat_casa');
+  const i = await getSetting('cat_ingreso');
+  gastoCats   = g || DEFAULT_GASTO_CATS;
+  casaCats    = c || DEFAULT_CASA_CATS;
+  ingresoCats = i || DEFAULT_INGRESO_CATS;
+  if (!g) await setSetting('cat_gasto',   gastoCats);
+  if (!c) await setSetting('cat_casa',    casaCats);
+  if (!i) await setSetting('cat_ingreso', ingresoCats);
+}
+
 async function loadAll() {
   allTransactions = await dbGetAll('transactions');
   allBudgets = await dbGetAll('budget');
   allReminders = await dbGetAll('reminders');
   superItems = await dbGetAll('super_items');
   superHistory = await dbGetAll('super_history');
-}
-
-/* ===========================
-   CATEGORIES
-   =========================== */
-async function loadCategories() {
-  gastoCats = await getSetting('cat_gasto', null);
-  if (!gastoCats) { gastoCats = DEFAULT_GASTO_CATS.map(c => ({...c})); await setSetting('cat_gasto', gastoCats); }
-  casaCats = await getSetting('cat_casa', null);
-  if (!casaCats) { casaCats = DEFAULT_CASA_CATS.map(c => ({...c})); await setSetting('cat_casa', casaCats); }
-  ingresoCats = await getSetting('cat_ingreso', null);
-  if (!ingresoCats) { ingresoCats = DEFAULT_INGRESO_CATS.map(c => ({...c})); await setSetting('cat_ingreso', ingresoCats); }
-  rebuildCatIconMap();
-}
-
-function rebuildCatIconMap() {
-  catIconMap = {};
-  [...gastoCats, ...casaCats, ...ingresoCats].forEach(c => { catIconMap[c.name] = c.icon; });
-}
-
-function getCatsForType(type) {
-  return type === 'casa' ? casaCats : type === 'ingreso' ? ingresoCats : gastoCats;
 }
 
 /* ===========================
@@ -507,20 +503,12 @@ function renderPresupuesto() {
 
 function setupBudgetHandlers() {
   document.getElementById('add-budget-category-btn').addEventListener('click', () => {
-    populateBudgetCatSelect();
     document.getElementById('budget-edit-cat').value = '';
     document.getElementById('budget-cat').value = '';
     document.getElementById('budget-limit').value = '';
+    populateBudgetCatSelect();
     document.getElementById('budget-modal-overlay').classList.remove('hidden');
   });
-}
-
-function populateBudgetCatSelect(selected) {
-  const select = document.getElementById('budget-cat');
-  const cats = [...gastoCats, ...casaCats];
-  select.innerHTML = '<option value="">Seleccioná una categoría</option>' +
-    cats.map(c => `<option value="${escHtml(c.name)}">${c.icon} ${escHtml(c.name)}</option>`).join('');
-  if (selected) select.value = selected;
 }
 
 async function submitBudget(e) {
@@ -548,8 +536,9 @@ async function deleteBudget(cat) {
 function editBudget(cat) {
   const b = allBudgets.find(b => b.category === cat);
   if (!b) return;
-  populateBudgetCatSelect(cat);
   document.getElementById('budget-edit-cat').value = cat;
+  populateBudgetCatSelect();
+  document.getElementById('budget-cat').value = cat;
   document.getElementById('budget-limit').value = b.limit;
   document.getElementById('budget-modal-overlay').classList.remove('hidden');
 }
@@ -678,9 +667,24 @@ async function openEditModal(id) {
 }
 
 function renderCategoryChips(type) {
-  const cats = getCatsForType(type);
+  const cats = type === 'casa' ? casaCats : type === 'ingreso' ? ingresoCats : gastoCats;
   const container = document.getElementById('category-chips-modal');
-  container.innerHTML = cats.map(c => `<button type="button" class="cat-chip" data-value="${escHtml(c.name)}" onclick="selectCategory('${escHtml(c.name)}')">${c.icon} ${escHtml(c.name)}</button>`).join('');
+  container.innerHTML = cats.map(c =>
+    `<button type="button" class="cat-chip" data-value="${escHtml(c.name)}" onclick="selectCategory('${escHtml(c.name)}')">${c.icon} ${c.name}</button>`
+  ).join('');
+}
+
+function populateBudgetCatSelect() {
+  const sel = document.getElementById('budget-cat');
+  const current = sel.value;
+  sel.innerHTML = '<option value="">Seleccioná una categoría</option>';
+  [...gastoCats, ...casaCats].forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.name;
+    opt.textContent = `${c.icon} ${c.name}`;
+    sel.appendChild(opt);
+  });
+  if (current) sel.value = current;
 }
 
 function selectCategory(cat) {
@@ -775,7 +779,23 @@ function showTicketPreview() {
   document.getElementById('ticket-remove').classList.remove('hidden');
 }
 
+/* ===========================
+   ACTION SHEET (FAB +)
+   =========================== */
+function openActionSheet() {
+  document.getElementById('action-sheet-overlay').classList.remove('hidden');
+}
+function closeActionSheet(e) {
+  if (e && e.target !== document.getElementById('action-sheet-overlay')) return;
+  document.getElementById('action-sheet-overlay').classList.add('hidden');
+}
+function actionSelect(type) {
+  closeActionSheet();
+  setTimeout(() => openAddModal(type), 200);
+}
+
 async function scanTicket() {
+  // Fallback Tesseract local
   if (typeof Tesseract === 'undefined') {
     showToast('Esperá unos segundos, cargando motor de escaneo...');
     return;
@@ -796,6 +816,250 @@ async function scanTicket() {
     reader.readAsDataURL(file);
   };
   input.click();
+}
+
+/* ===========================
+   GROQ AI VISION
+   =========================== */
+async function scanTicketAI() {
+  const apiKey = await getSetting('groqApiKey');
+  if (!apiKey) {
+    showToast('Configurá tu API key primero');
+    closeModal();
+    setTimeout(() => openSettingsModal(), 300);
+    return;
+  }
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.capture = 'environment';
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      ticketDataUrl = ev.target.result;
+      showTicketPreview();
+      await runGroqOCR(ticketDataUrl, apiKey);
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+async function runGroqOCR(imageDataUrl, apiKey) {
+  const statusEl = document.getElementById('ocr-status');
+  const resultEl = document.getElementById('ocr-result');
+  const titleEl = document.getElementById('ocr-title');
+  const progressEl = document.getElementById('ocr-progress');
+
+  resultEl.classList.add('hidden');
+  statusEl.classList.remove('hidden');
+  titleEl.textContent = 'Analizando ticket con IA...';
+  progressEl.textContent = 'Conectando con Groq';
+
+  try {
+    const compressedImage = await compressImage(imageDataUrl, 1024, 0.8);
+    progressEl.textContent = 'Enviando imagen...';
+
+    const prompt = `Analizá esta imagen de un ticket o comprobante de compra argentino. Extraé la información y respondé ÚNICAMENTE con un JSON válido (sin texto adicional, sin markdown, sin explicaciones).
+
+Formato exacto:
+{
+  "monto_total": 1234.56,
+  "comercio": "Nombre del comercio",
+  "fecha": "2025-06-09",
+  "categoria_sugerida": "Comida",
+  "items": ["Producto 1", "Producto 2"]
+}
+
+Reglas:
+- monto_total debe ser el TOTAL FINAL del ticket (no subtotal ni items individuales), como número decimal sin símbolos
+- comercio: nombre que aparece arriba del ticket o más prominente
+- fecha en formato YYYY-MM-DD; si no la encontrás, usá la de hoy
+- categoria_sugerida debe ser UNA de: Comida, Transporte, Salud, Ocio, Ropa, Educación, Luz, Gas, Agua, Internet, Arreglo, Otros
+- items: lista corta de los productos principales (máximo 5, nombres cortos)
+- Si algún dato no se puede leer, usá null para ese campo (excepto monto_total)
+- Respondé SOLO el JSON, nada más`;
+
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: prompt },
+              { type: 'image_url', image_url: { url: compressedImage } }
+            ]
+          }
+        ],
+        temperature: 0.1,
+        max_tokens: 500,
+        response_format: { type: 'json_object' }
+      })
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`API ${response.status}: ${errText.slice(0, 200)}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content;
+    if (!content) throw new Error('Respuesta vacía de Groq');
+
+    let parsed;
+    try {
+      parsed = JSON.parse(content);
+    } catch {
+      const match = content.match(/\{[\s\S]*\}/);
+      if (match) parsed = JSON.parse(match[0]);
+      else throw new Error('No se pudo parsear la respuesta');
+    }
+
+    statusEl.classList.add('hidden');
+
+    if (parsed.monto_total && !isNaN(parsed.monto_total)) {
+      const amount = parseFloat(parsed.monto_total);
+      document.getElementById('tx-amount').value = amount.toFixed(2);
+      document.getElementById('ocr-result-amount').textContent = formatCurrency(amount);
+      resultEl.classList.remove('hidden');
+
+      const descField = document.getElementById('tx-desc');
+      if (!descField.value && parsed.comercio) {
+        descField.value = parsed.comercio.substring(0, 80);
+      }
+
+      if (parsed.fecha && /^\d{4}-\d{2}-\d{2}$/.test(parsed.fecha)) {
+        document.getElementById('tx-date').value = parsed.fecha;
+      }
+
+      if (parsed.categoria_sugerida && !selectedCategory) {
+        const type = document.getElementById('tx-type').value;
+        const validCats = type === 'casa' ? CASA_CATS : GASTO_CATS;
+        if (validCats.includes(parsed.categoria_sugerida)) {
+          selectCategory(parsed.categoria_sugerida);
+        }
+      }
+
+      showToast(`✨ IA detectó ${formatCurrency(amount)}`);
+    } else {
+      showToast('No se pudo detectar el importe. Cargalo a mano.');
+    }
+  } catch (err) {
+    statusEl.classList.add('hidden');
+    console.error('Groq error:', err);
+    if (err.message.includes('401')) {
+      showToast('❌ API key inválida. Revisá la configuración.');
+    } else if (err.message.includes('429')) {
+      showToast('⏱️ Límite de uso alcanzado. Probá en un minuto.');
+    } else if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+      showToast('❌ Sin internet. Probá "Solo foto" o revisá tu conexión.');
+    } else {
+      showToast('Error al analizar. Intentá de nuevo o cargá a mano.');
+    }
+  }
+}
+
+async function compressImage(dataUrl, maxWidth = 1024, quality = 0.85) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img;
+      if (width > maxWidth) {
+        height = (height * maxWidth) / width;
+        width = maxWidth;
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = reject;
+    img.src = dataUrl;
+  });
+}
+
+/* ===========================
+   SETTINGS / API KEY
+   =========================== */
+async function openSettingsModal() {
+  const key = await getSetting('groqApiKey');
+  const input = document.getElementById('groq-api-key');
+  if (key) {
+    input.value = key;
+    document.getElementById('api-key-set').classList.remove('hidden');
+    document.getElementById('api-key-not-set').classList.add('hidden');
+    document.getElementById('clear-key-btn').classList.remove('hidden');
+  } else {
+    input.value = '';
+    document.getElementById('api-key-set').classList.add('hidden');
+    document.getElementById('api-key-not-set').classList.remove('hidden');
+    document.getElementById('clear-key-btn').classList.add('hidden');
+  }
+  document.getElementById('api-instructions').classList.add('hidden');
+  document.getElementById('settings-modal-overlay').classList.remove('hidden');
+}
+
+function closeSettingsModal(e) {
+  if (e && e.target !== document.getElementById('settings-modal-overlay')) return;
+  document.getElementById('settings-modal-overlay').classList.add('hidden');
+}
+
+function toggleInstructions() {
+  const box = document.getElementById('api-instructions');
+  box.classList.toggle('hidden');
+}
+
+async function saveGroqKey() {
+  const key = document.getElementById('groq-api-key').value.trim();
+  if (!key) { showToast('Pegá una API key primero'); return; }
+  if (!key.startsWith('gsk_')) {
+    showToast('La key debe empezar con "gsk_"');
+    return;
+  }
+  await setSetting('groqApiKey', key);
+  document.getElementById('api-key-set').classList.remove('hidden');
+  document.getElementById('api-key-not-set').classList.add('hidden');
+  document.getElementById('clear-key-btn').classList.remove('hidden');
+  showToast('✅ Clave guardada');
+}
+
+async function testGroqKey() {
+  const key = document.getElementById('groq-api-key').value.trim();
+  if (!key) { showToast('Pegá la key primero'); return; }
+  showToast('Probando conexión...');
+  try {
+    const response = await fetch('https://api.groq.com/openai/v1/models', {
+      headers: { 'Authorization': `Bearer ${key}` }
+    });
+    if (response.ok) {
+      showToast('✅ Conexión OK — guardá la clave');
+    } else if (response.status === 401) {
+      showToast('❌ Clave inválida');
+    } else {
+      showToast(`Error ${response.status}`);
+    }
+  } catch (err) {
+    showToast('❌ Sin internet o error de red');
+  }
+}
+
+async function clearGroqKey() {
+  if (!confirm('¿Borrar la API key guardada? Vas a tener que pegarla de nuevo para usar IA.')) return;
+  await setSetting('groqApiKey', null);
+  document.getElementById('groq-api-key').value = '';
+  document.getElementById('api-key-set').classList.add('hidden');
+  document.getElementById('api-key-not-set').classList.remove('hidden');
+  document.getElementById('clear-key-btn').classList.add('hidden');
+  showToast('Clave eliminada');
 }
 
 async function runOCR(imageDataUrl) {
@@ -1064,64 +1328,64 @@ function getTopCategory(txs) {
   return { category: sorted[0][0], total: sorted[0][1] };
 }
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.remove('hidden', 'fade-out');
-  clearTimeout(window._toastTimer);
-  window._toastTimer = setTimeout(() => {
-    t.classList.add('fade-out');
-    setTimeout(() => t.classList.add('hidden'), 300);
-  }, 2200);
+/* ===========================
+   AJUSTES — render
+   =========================== */
+function renderAjustes() {
+  renderCatList('gasto',   'cat-list-gasto',   gastoCats);
+  renderCatList('casa',    'cat-list-casa',     casaCats);
+  renderCatList('ingreso', 'cat-list-ingreso',  ingresoCats);
+}
+
+function renderCatList(type, containerId, cats) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = cats.map(c => `
+    <div class="budget-config-item" style="display:flex;align-items:center;gap:10px;padding:10px 14px">
+      <span class="cat-config-icon">${c.icon}</span>
+      <span style="flex:1;font-size:14px;font-weight:500;color:var(--text-1)">${escHtml(c.name)}</span>
+      <button class="budget-edit-btn" onclick="openCategoryModal('${type}','${escHtml(c.name)}')">Editar</button>
+      ${c.name !== 'Otros' ? `<button class="budget-del-btn" onclick="deleteCategory('${type}','${escHtml(c.name)}')">Eliminar</button>` : ''}
+    </div>`).join('');
 }
 
 /* ===========================
-   AJUSTES
+   AJUSTES — setup handlers
    =========================== */
 function setupAjustesHandlers() {
   document.getElementById('export-data-btn').addEventListener('click', exportData);
   document.getElementById('import-data-btn').addEventListener('click', () => {
     document.getElementById('import-file-input').click();
   });
-  document.getElementById('import-file-input').addEventListener('change', (e) => {
+  document.getElementById('import-file-input').addEventListener('change', e => {
     const file = e.target.files[0];
     if (file) importData(file);
     e.target.value = '';
   });
-  document.querySelectorAll('.add-cat-btn').forEach(btn => {
-    btn.addEventListener('click', () => openCategoryModal(btn.dataset.type));
-  });
+  document.getElementById('add-cat-gasto-btn').addEventListener('click',   () => openCategoryModal('gasto'));
+  document.getElementById('add-cat-casa-btn').addEventListener('click',    () => openCategoryModal('casa'));
+  document.getElementById('add-cat-ingreso-btn').addEventListener('click', () => openCategoryModal('ingreso'));
 }
 
-function renderAjustes() {
-  renderCategoryList('gasto', 'cat-list-gasto');
-  renderCategoryList('casa', 'cat-list-casa');
-  renderCategoryList('ingreso', 'cat-list-ingreso');
-}
-
-function renderCategoryList(type, containerId) {
-  const cats = getCatsForType(type);
-  const container = document.getElementById(containerId);
-  container.innerHTML = cats.map(c => `<div class="budget-config-item">
-    <div class="budget-config-header">
-      <span class="budget-config-cat">${c.icon} ${escHtml(c.name)}</span>
-      <div style="display:flex;gap:6px">
-        <button class="budget-edit-btn" onclick="openCategoryModal('${type}','${escHtml(c.name)}')">Editar ícono</button>
-        ${(c.name !== 'Otros' && c.name !== 'Otro ingreso') ? `<button class="budget-del-btn" onclick="deleteCategory('${type}','${escHtml(c.name)}')">Eliminar</button>` : ''}
-      </div>
-    </div>
-  </div>`).join('');
-}
-
+/* ===========================
+   CATEGORÍAS — modal
+   =========================== */
 function openCategoryModal(type, editName = null) {
   document.getElementById('cat-type').value = type;
   document.getElementById('cat-edit-name').value = editName || '';
-  document.getElementById('category-modal-title').textContent = editName ? `Editar ícono · ${editName}` : 'Nueva categoría';
-  document.getElementById('cat-name-input').value = editName || '';
-  document.getElementById('cat-name-input').disabled = !!editName;
-  const cats = getCatsForType(type);
-  const existing = cats.find(c => c.name === editName);
-  document.getElementById('cat-icon-input').value = existing ? existing.icon : '';
+  const titles = { gasto:'Categoría de gastos', casa:'Categoría de casa', ingreso:'Categoría de ingresos' };
+  document.getElementById('cat-modal-title').textContent = editName ? 'Editar categoría' : `Nueva categoría — ${titles[type]}`;
+  if (editName) {
+    const arr = type === 'gasto' ? gastoCats : type === 'casa' ? casaCats : ingresoCats;
+    const cat = arr.find(c => c.name === editName);
+    document.getElementById('cat-icon-input').value = cat ? cat.icon : '';
+    document.getElementById('cat-name-input').value = editName;
+    document.getElementById('cat-name-input').disabled = true;
+  } else {
+    document.getElementById('cat-icon-input').value = '';
+    document.getElementById('cat-name-input').value = '';
+    document.getElementById('cat-name-input').disabled = false;
+  }
   document.getElementById('category-modal-overlay').classList.remove('hidden');
 }
 
@@ -1132,42 +1396,42 @@ function closeCategoryModal(e) {
 
 async function submitCategory(e) {
   e.preventDefault();
-  const type = document.getElementById('cat-type').value;
+  const type     = document.getElementById('cat-type').value;
   const editName = document.getElementById('cat-edit-name').value;
-  const icon = document.getElementById('cat-icon-input').value.trim();
-  const name = document.getElementById('cat-name-input').value.trim();
-  if (!icon || !name) { showToast('Completá ícono y nombre'); return; }
+  const icon     = document.getElementById('cat-icon-input').value.trim() || '📌';
+  const name     = document.getElementById('cat-name-input').value.trim();
+  if (!name) { showToast('Escribí un nombre'); return; }
 
-  const cats = getCatsForType(type);
+  const arr = type === 'gasto' ? gastoCats : type === 'casa' ? casaCats : ingresoCats;
+
   if (editName) {
-    const entry = cats.find(c => c.name === editName);
-    if (entry) entry.icon = icon;
+    const idx = arr.findIndex(c => c.name === editName);
+    if (idx >= 0) arr[idx].icon = icon;
   } else {
-    if (cats.some(c => c.name.toLowerCase() === name.toLowerCase())) {
-      showToast('Ya existe una categoría con ese nombre');
-      return;
+    if (arr.find(c => c.name.toLowerCase() === name.toLowerCase())) {
+      showToast('Ya existe esa categoría'); return;
     }
-    const otrosIdx = cats.findIndex(c => c.name === 'Otros' || c.name === 'Otro ingreso');
-    if (otrosIdx >= 0) cats.splice(otrosIdx, 0, { name, icon });
-    else cats.push({ name, icon });
+    arr.push({ name, icon });
   }
-  await setSetting(`cat_${type}`, cats);
+
+  const key = type === 'gasto' ? 'cat_gasto' : type === 'casa' ? 'cat_casa' : 'cat_ingreso';
+  await setSetting(key, arr);
   rebuildCatIconMap();
-  closeCategoryModal();
+  document.getElementById('category-modal-overlay').classList.add('hidden');
   renderAjustes();
-  if (currentView === 'dashboard') renderDashboard();
   showToast(editName ? 'Categoría actualizada' : 'Categoría agregada');
 }
 
 async function deleteCategory(type, name) {
-  if (name === 'Otros' || name === 'Otro ingreso') return;
-  if (!confirm(`¿Eliminar la categoría "${name}"? Las transacciones existentes con esta categoría no se modificarán.`)) return;
-  let cats = getCatsForType(type);
-  cats = cats.filter(c => c.name !== name);
-  if (type === 'casa') casaCats = cats;
-  else if (type === 'ingreso') ingresoCats = cats;
-  else gastoCats = cats;
-  await setSetting(`cat_${type}`, cats);
+  if (name === 'Otros') { showToast('No podés eliminar "Otros"'); return; }
+  if (!confirm(`¿Eliminar la categoría "${name}"?`)) return;
+  const arr = type === 'gasto' ? gastoCats : type === 'casa' ? casaCats : ingresoCats;
+  const filtered = arr.filter(c => c.name !== name);
+  if (type === 'gasto')   gastoCats   = filtered;
+  if (type === 'casa')    casaCats    = filtered;
+  if (type === 'ingreso') ingresoCats = filtered;
+  const key = type === 'gasto' ? 'cat_gasto' : type === 'casa' ? 'cat_casa' : 'cat_ingreso';
+  await setSetting(key, filtered);
   rebuildCatIconMap();
   renderAjustes();
   showToast('Categoría eliminada');
@@ -1177,54 +1441,66 @@ async function deleteCategory(type, name) {
    EXPORTAR / IMPORTAR
    =========================== */
 async function exportData() {
+  showToast('Preparando backup...');
   const data = {
-    transactions: await dbGetAll('transactions'),
-    budget: await dbGetAll('budget'),
-    reminders: await dbGetAll('reminders'),
-    super_items: await dbGetAll('super_items'),
+    transactions:  await dbGetAll('transactions'),
+    budget:        await dbGetAll('budget'),
+    reminders:     await dbGetAll('reminders'),
+    super_items:   await dbGetAll('super_items'),
     super_history: await dbGetAll('super_history'),
-    settings: await dbGetAll('settings'),
+    settings:      await dbGetAll('settings'),
   };
-  const payload = { app: 'finanzio', version: 1, exportedAt: new Date().toISOString(), data };
+  const payload = {
+    app: 'finanzio', version: 1,
+    exportedAt: new Date().toISOString(),
+    data
+  };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  const dateStr = new Date().toISOString().split('T')[0];
-  a.href = url;
-  a.download = `finanzio-backup-${dateStr}.json`;
-  document.body.appendChild(a);
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `finanzio-backup-${new Date().toISOString().split('T')[0]}.json`;
   a.click();
-  a.remove();
   URL.revokeObjectURL(url);
-  showToast('Datos exportados ✓');
+  showToast('Backup descargado ✓');
 }
 
 async function importData(file) {
-  let payload;
+  let parsed;
   try {
-    payload = JSON.parse(await file.text());
+    const text = await file.text();
+    parsed = JSON.parse(text);
   } catch {
-    showToast('Archivo inválido');
-    return;
+    showToast('Archivo inválido'); return;
   }
-  const data = payload && payload.data;
-  const stores = ['transactions', 'budget', 'reminders', 'super_items', 'super_history', 'settings'];
-  if (!data || !stores.every(s => Array.isArray(data[s]))) {
-    showToast('Archivo inválido');
-    return;
+  const { data } = parsed;
+  const required = ['transactions','budget','reminders','super_items','super_history','settings'];
+  if (!data || required.some(k => !Array.isArray(data[k]))) {
+    showToast('Archivo inválido o incompleto'); return;
   }
-  if (!confirm('Esto reemplazará todos tus datos actuales. ¿Continuar?')) return;
+  if (!confirm('Esto va a reemplazar TODOS tus datos actuales con los del backup. ¿Continuar?')) return;
 
+  showToast('Importando...');
+  const stores = ['transactions','budget','reminders','super_items','super_history','settings'];
   for (const store of stores) {
     await dbClear(store);
-    for (const item of data[store]) {
-      await dbPut(store, item);
-    }
+    for (const item of data[store]) { await dbPut(store, item); }
   }
 
   await loadAll();
   await loadCategories();
+  rebuildCatIconMap();
   navigate(currentView);
   renderDashboard();
-  showToast('Datos importados ✓');
+  showToast('Datos importados correctamente ✓');
+}
+
+function showToast(msg) {
+  t.textContent = msg;
+  t.classList.remove('hidden', 'fade-out');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => {
+    t.classList.add('fade-out');
+    setTimeout(() => t.classList.add('hidden'), 300);
+  }, 2200);
 }

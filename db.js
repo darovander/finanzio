@@ -77,22 +77,22 @@ async function dbDelete(storeName, key) {
   });
 }
 
-async function dbClear(storeName) {
-  const d = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = d.transaction(storeName, 'readwrite');
-    const req = tx.objectStore(storeName).clear();
-    req.onsuccess = () => resolve();
-    req.onerror = () => reject(req.error);
-  });
-}
-
 async function dbGet(storeName, key) {
   const d = await openDB();
   return new Promise((resolve, reject) => {
     const tx = d.transaction(storeName, 'readonly');
     const req = tx.objectStore(storeName).get(key);
     req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function dbClear(storeName) {
+  const d = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = d.transaction(storeName, 'readwrite');
+    const req = tx.objectStore(storeName).clear();
+    req.onsuccess = () => resolve();
     req.onerror = () => reject(req.error);
   });
 }
