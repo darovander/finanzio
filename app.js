@@ -88,7 +88,7 @@ async function loadAll() {
 /* ===========================
    NAVIGATION
    =========================== */
-function navigate(view) {
+async function navigate(view) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   const viewEl = document.getElementById(`view-${view}`);
@@ -116,20 +116,20 @@ function navigate(view) {
     pageTitleEl.textContent = titles[view] || view;
   }
   currentView = view;
-  renderView(view);
+  await renderView(view);
   document.getElementById('main-content').scrollTop = 0;
 }
 
-function renderView(view) {
+async function renderView(view) {
   switch(view) {
-    case 'dashboard': renderDashboard(); break;
-    case 'gastos': renderTransactionList('gastos'); break;
-    case 'ingresos': renderTransactionList('ingresos'); break;
-    case 'super': renderSuper(); break;
-    case 'casa': renderTransactionList('casa'); break;
-    case 'presupuesto': renderPresupuesto(); break;
+    case 'dashboard':     renderDashboard(); break;
+    case 'gastos':        renderTransactionList('gastos'); break;
+    case 'ingresos':      renderTransactionList('ingresos'); break;
+    case 'super':         renderSuper(); break;
+    case 'casa':          renderTransactionList('casa'); break;
+    case 'presupuesto':   renderPresupuesto(); break;
     case 'recordatorios': renderRecordatorios(); break;
-    case 'ajustes': renderAjustes(); break;
+    case 'ajustes':       await renderAjustes(); break;
   }
 }
 
