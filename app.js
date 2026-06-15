@@ -18,30 +18,13 @@ let gastosCatFilter = 'all';
 let casaCatFilter = 'all';
 let deferredInstall = null;
 
-// Categorías con defaults
-const DEFAULT_GASTO_CATS = [
-  {name:'Comida',icon:'🍔'},{name:'Transporte',icon:'🚗'},{name:'Salud',icon:'💊'},
-  {name:'Ocio',icon:'🎮'},{name:'Ropa',icon:'👕'},{name:'Educación',icon:'📚'},
-  {name:'Otros',icon:'💸'}
-];
-const DEFAULT_CASA_CATS = [
-  {name:'Luz',icon:'💡'},{name:'Gas',icon:'🔥'},{name:'Agua',icon:'💧'},
-  {name:'Internet',icon:'📡'},{name:'Arreglo',icon:'🔧'},{name:'Otros',icon:'🏠'}
-];
-const DEFAULT_INGRESO_CATS = [
-  {name:'Sueldo',icon:'💼'},{name:'Freelance',icon:'💻'},
-  {name:'Venta',icon:'🏷️'},{name:'Otro ingreso',icon:'💵'}
-];
-
-let gastoCats = [...DEFAULT_GASTO_CATS];
-let casaCats  = [...DEFAULT_CASA_CATS];
-let ingresoCats = [...DEFAULT_INGRESO_CATS];
-let catIconMap = {};
-
-function rebuildCatIconMap() {
-  catIconMap = {};
-  [...gastoCats, ...casaCats, ...ingresoCats].forEach(c => { catIconMap[c.name] = c.icon; });
-}
+const GASTO_CATS = ['Comida','Transporte','Salud','Ocio','Ropa','Educación','Otros'];
+const CASA_CATS = ['Luz','Gas','Agua','Internet','Arreglo','Otros'];
+const CAT_ICONS = {
+  Comida:'🍔', Transporte:'🚗', Salud:'💊', Ocio:'🎮', Ropa:'👕',
+  Educación:'📚', Otros:'💸', Luz:'💡', Gas:'🔥', Agua:'💧',
+  Internet:'📡', Arreglo:'🔧', 'Casa':'🏠', 'Ingreso':'💵',
+};
 
 /* ===========================
    INIT
@@ -49,8 +32,6 @@ function rebuildCatIconMap() {
 window.addEventListener('DOMContentLoaded', async () => {
   applyTheme(await getSetting('theme', 'auto'));
   await loadAll();
-  await loadCategories();
-  rebuildCatIconMap();
   setupThemeToggle();
   setupInstallBanner();
   setupDateDefault();
@@ -58,24 +39,11 @@ window.addEventListener('DOMContentLoaded', async () => {
   setupBudgetHandlers();
   setupFilterChips();
   setupTicketUpload();
-  setupAjustesHandlers();
   navigate('dashboard');
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   }
 });
-
-async function loadCategories() {
-  const g = await getSetting('cat_gasto');
-  const c = await getSetting('cat_casa');
-  const i = await getSetting('cat_ingreso');
-  gastoCats   = g || DEFAULT_GASTO_CATS;
-  casaCats    = c || DEFAULT_CASA_CATS;
-  ingresoCats = i || DEFAULT_INGRESO_CATS;
-  if (!g) await setSetting('cat_gasto',   gastoCats);
-  if (!c) await setSetting('cat_casa',    casaCats);
-  if (!i) await setSetting('cat_ingreso', ingresoCats);
-}
 
 async function loadAll() {
   allTransactions = await dbGetAll('transactions');
@@ -88,7 +56,7 @@ async function loadAll() {
 /* ===========================
    NAVIGATION
    =========================== */
-async function navigate(view) {
+function navigate(view) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   const viewEl = document.getElementById(`view-${view}`);
@@ -102,7 +70,7 @@ async function navigate(view) {
   const titles = {
     dashboard: 'Finanzio', gastos: 'Gastos', ingresos: 'Ingresos',
     super: 'Supermercado', casa: 'Casa & Hogar', presupuesto: 'Presupuesto',
-    recordatorios: 'Recordatorios', ajustes: 'Ajustes'
+    recordatorios: 'Recordatorios'
   };
 
   if (view === 'dashboard') {
@@ -116,20 +84,19 @@ async function navigate(view) {
     pageTitleEl.textContent = titles[view] || view;
   }
   currentView = view;
-  await renderView(view);
+  renderView(view);
   document.getElementById('main-content').scrollTop = 0;
 }
 
-async function renderView(view) {
+function renderView(view) {
   switch(view) {
-    case 'dashboard':     renderDashboard(); break;
-    case 'gastos':        renderTransactionList('gastos'); break;
-    case 'ingresos':      renderTransactionList('ingresos'); break;
-    case 'super':         renderSuper(); break;
-    case 'casa':          renderTransactionList('casa'); break;
-    case 'presupuesto':   renderPresupuesto(); break;
+    case 'dashboard': renderDashboard(); break;
+    case 'gastos': renderTransactionList('gastos'); break;
+    case 'ingresos': renderTransactionList('ingresos'); break;
+    case 'super': renderSuper(); break;
+    case 'casa': renderTransactionList('casa'); break;
+    case 'presupuesto': renderPresupuesto(); break;
     case 'recordatorios': renderRecordatorios(); break;
-    case 'ajustes':       await renderAjustes(); break;
   }
 }
 
@@ -346,7 +313,7 @@ function renderTransactionList(view) {
 }
 
 function txItemHTML(t, showActions) {
-  const icon = catIconMap[t.category] || (t.type === 'ingreso' ? '💵' : '💸');
+  const icon = CAT_ICONS[t.category] || (t.type === 'ingreso' ? '💵' : '💸');
   const amountClass = t.type === 'ingreso' ? 'pos' : 'neg';
   const sign = t.type === 'ingreso' ? '+' : '-';
   const ticket = t.ticket ? `<img src="${t.ticket}" class="tx-ticket-thumb" alt="Ticket" onclick="viewTicket('${t.ticket}')" />` : '';
@@ -489,7 +456,7 @@ function renderPresupuesto() {
     const cls = pct >= 100 ? 'danger' : pct >= 80 ? 'warning' : 'ok';
     return `<div class="budget-config-item">
       <div class="budget-config-header">
-        <span class="budget-config-cat">${catIconMap[b.category] || '💰'} ${b.category}</span>
+        <span class="budget-config-cat">${CAT_ICONS[b.category] || '💰'} ${b.category}</span>
         <div style="display:flex;gap:6px">
           <button class="budget-edit-btn" onclick="editBudget('${b.category}')">Editar</button>
           <button class="budget-del-btn" onclick="deleteBudget('${b.category}')">Eliminar</button>
@@ -506,7 +473,6 @@ function setupBudgetHandlers() {
     document.getElementById('budget-edit-cat').value = '';
     document.getElementById('budget-cat').value = '';
     document.getElementById('budget-limit').value = '';
-    populateBudgetCatSelect();
     document.getElementById('budget-modal-overlay').classList.remove('hidden');
   });
 }
@@ -537,7 +503,6 @@ function editBudget(cat) {
   const b = allBudgets.find(b => b.category === cat);
   if (!b) return;
   document.getElementById('budget-edit-cat').value = cat;
-  populateBudgetCatSelect();
   document.getElementById('budget-cat').value = cat;
   document.getElementById('budget-limit').value = b.limit;
   document.getElementById('budget-modal-overlay').classList.remove('hidden');
@@ -625,6 +590,8 @@ function openAddModal(type) {
 
   renderCategoryChips(type);
   selectedCategory = '';
+  const overlay = document.getElementById('modal-overlay');
+  overlay.style.display = '';
   document.getElementById('modal-overlay').classList.remove('hidden');
   setTimeout(() => document.getElementById('tx-amount').focus(), 300);
 }
@@ -667,24 +634,9 @@ async function openEditModal(id) {
 }
 
 function renderCategoryChips(type) {
-  const cats = type === 'casa' ? casaCats : type === 'ingreso' ? ingresoCats : gastoCats;
+  const cats = type === 'casa' ? CASA_CATS : type === 'ingreso' ? ['Sueldo','Freelance','Venta','Otro ingreso'] : GASTO_CATS;
   const container = document.getElementById('category-chips-modal');
-  container.innerHTML = cats.map(c =>
-    `<button type="button" class="cat-chip" data-value="${escHtml(c.name)}" onclick="selectCategory('${escHtml(c.name)}')">${c.icon} ${c.name}</button>`
-  ).join('');
-}
-
-function populateBudgetCatSelect() {
-  const sel = document.getElementById('budget-cat');
-  const current = sel.value;
-  sel.innerHTML = '<option value="">Seleccioná una categoría</option>';
-  [...gastoCats, ...casaCats].forEach(c => {
-    const opt = document.createElement('option');
-    opt.value = c.name;
-    opt.textContent = `${c.icon} ${c.name}`;
-    sel.appendChild(opt);
-  });
-  if (current) sel.value = current;
+  container.innerHTML = cats.map(c => `<button type="button" class="cat-chip" data-value="${c}" onclick="selectCategory('${c}')">${c}</button>`).join('');
 }
 
 function selectCategory(cat) {
@@ -696,7 +648,18 @@ function selectCategory(cat) {
 
 function closeModal(e) {
   if (e && e.target !== document.getElementById('modal-overlay')) return;
-  document.getElementById('modal-overlay').classList.add('hidden');
+  const overlay = document.getElementById('modal-overlay');
+  overlay.classList.add('hidden');
+  overlay.style.display = 'none';
+  document.getElementById('transaction-form').reset();
+  document.getElementById('ticket-preview').classList.add('hidden');
+  document.getElementById('ticket-actions-row').classList.remove('hidden');
+  document.getElementById('ticket-remove').classList.add('hidden');
+  document.getElementById('ocr-result').classList.add('hidden');
+  document.getElementById('ocr-status').classList.add('hidden');
+  selectedCategory = '';
+  editingTxId = null;
+  ticketDataUrl = null;
 }
 
 async function submitTransaction(e) {
@@ -712,7 +675,7 @@ async function submitTransaction(e) {
     const id = await dbAdd('reminders', reminder);
     reminder.id = id;
     allReminders.push(reminder);
-    document.getElementById('modal-overlay').classList.add('hidden');
+    closeModal();
     showToast('Recordatorio agregado');
     if (currentView === 'recordatorios') renderRecordatorios();
     if (currentView === 'dashboard') renderDashboard();
@@ -743,7 +706,7 @@ async function submitTransaction(e) {
     showToast('Guardado ✓');
   }
 
-  document.getElementById('modal-overlay').classList.add('hidden');
+  closeModal();
   renderView(currentView);
   if (currentView !== 'dashboard') renderDashboard();
 }
@@ -824,9 +787,9 @@ async function scanTicket() {
 async function scanTicketAI() {
   const apiKey = await getSetting('groqApiKey');
   if (!apiKey) {
-    showToast('Configurá tu API key en Ajustes ⚙️');
+    showToast('Configurá tu API key primero');
     closeModal();
-    setTimeout(() => navigate('ajustes'), 300);
+    setTimeout(() => openSettingsModal(), 300);
     return;
   }
   const input = document.createElement('input');
@@ -1021,20 +984,15 @@ function toggleInstructions() {
 async function saveGroqKey() {
   const key = document.getElementById('groq-api-key').value.trim();
   if (!key) { showToast('Pegá una API key primero'); return; }
-  if (key.length < 20) { showToast('La key parece muy corta, verificala'); return; }
-  try {
-    await setSetting('groqApiKey', key);
-    // Verificar que quedó guardada
-    const check = await getSetting('groqApiKey');
-    if (check !== key) throw new Error('Verificación fallida');
-    document.getElementById('api-key-set').classList.remove('hidden');
-    document.getElementById('api-key-not-set').classList.add('hidden');
-    document.getElementById('clear-key-btn').classList.remove('hidden');
-    showToast('✅ Clave guardada correctamente');
-  } catch (e) {
-    console.error('Error guardando key:', e);
-    showToast('❌ Error al guardar. Intentá de nuevo.');
+  if (!key.startsWith('gsk_')) {
+    showToast('La key debe empezar con "gsk_"');
+    return;
   }
+  await setSetting('groqApiKey', key);
+  document.getElementById('api-key-set').classList.remove('hidden');
+  document.getElementById('api-key-not-set').classList.add('hidden');
+  document.getElementById('clear-key-btn').classList.remove('hidden');
+  showToast('✅ Clave guardada');
 }
 
 async function testGroqKey() {
@@ -1058,8 +1016,8 @@ async function testGroqKey() {
 }
 
 async function clearGroqKey() {
-  if (!confirm('¿Borrar la API key guardada?')) return;
-  await dbDelete('settings', 'groqApiKey');
+  if (!confirm('¿Borrar la API key guardada? Vas a tener que pegarla de nuevo para usar IA.')) return;
+  await setSetting('groqApiKey', null);
   document.getElementById('groq-api-key').value = '';
   document.getElementById('api-key-set').classList.add('hidden');
   document.getElementById('api-key-not-set').classList.remove('hidden');
@@ -1333,192 +1291,8 @@ function getTopCategory(txs) {
   return { category: sorted[0][0], total: sorted[0][1] };
 }
 
-/* ===========================
-   AJUSTES — render
-   =========================== */
-async function renderAjustes() {
-  renderCatList('gasto',   'cat-list-gasto',   gastoCats);
-  renderCatList('casa',    'cat-list-casa',     casaCats);
-  renderCatList('ingreso', 'cat-list-ingreso',  ingresoCats);
-
-  // Cargar estado de la API key en la vista
-  const key = await getSetting('groqApiKey');
-  const inputEl    = document.getElementById('groq-api-key');
-  const setEl      = document.getElementById('api-key-set');
-  const notSetEl   = document.getElementById('api-key-not-set');
-  const clearBtn   = document.getElementById('clear-key-btn');
-  if (key) {
-    if (inputEl)  inputEl.value = key;
-    if (setEl)    setEl.classList.remove('hidden');
-    if (notSetEl) notSetEl.classList.add('hidden');
-    if (clearBtn) clearBtn.classList.remove('hidden');
-  } else {
-    if (inputEl)  inputEl.value = '';
-    if (setEl)    setEl.classList.add('hidden');
-    if (notSetEl) notSetEl.classList.remove('hidden');
-    if (clearBtn) clearBtn.classList.add('hidden');
-  }
-}
-
-function renderCatList(type, containerId, cats) {
-  const container = document.getElementById(containerId);
-  if (!container) return;
-  container.innerHTML = cats.map(c => `
-    <div class="budget-config-item" style="display:flex;align-items:center;gap:10px;padding:10px 14px">
-      <span class="cat-config-icon">${c.icon}</span>
-      <span style="flex:1;font-size:14px;font-weight:500;color:var(--text-1)">${escHtml(c.name)}</span>
-      <button class="budget-edit-btn" onclick="openCategoryModal('${type}','${escHtml(c.name)}')">Editar</button>
-      ${c.name !== 'Otros' ? `<button class="budget-del-btn" onclick="deleteCategory('${type}','${escHtml(c.name)}')">Eliminar</button>` : ''}
-    </div>`).join('');
-}
-
-/* ===========================
-   AJUSTES — setup handlers
-   =========================== */
-function setupAjustesHandlers() {
-  document.getElementById('export-data-btn').addEventListener('click', exportData);
-  document.getElementById('import-data-btn').addEventListener('click', () => {
-    document.getElementById('import-file-input').click();
-  });
-  document.getElementById('import-file-input').addEventListener('change', e => {
-    const file = e.target.files[0];
-    if (file) importData(file);
-    e.target.value = '';
-  });
-  document.getElementById('add-cat-gasto-btn').addEventListener('click',   () => openCategoryModal('gasto'));
-  document.getElementById('add-cat-casa-btn').addEventListener('click',    () => openCategoryModal('casa'));
-  document.getElementById('add-cat-ingreso-btn').addEventListener('click', () => openCategoryModal('ingreso'));
-}
-
-/* ===========================
-   CATEGORÍAS — modal
-   =========================== */
-function openCategoryModal(type, editName = null) {
-  document.getElementById('cat-type').value = type;
-  document.getElementById('cat-edit-name').value = editName || '';
-  const titles = { gasto:'Categoría de gastos', casa:'Categoría de casa', ingreso:'Categoría de ingresos' };
-  document.getElementById('cat-modal-title').textContent = editName ? 'Editar categoría' : `Nueva categoría — ${titles[type]}`;
-  if (editName) {
-    const arr = type === 'gasto' ? gastoCats : type === 'casa' ? casaCats : ingresoCats;
-    const cat = arr.find(c => c.name === editName);
-    document.getElementById('cat-icon-input').value = cat ? cat.icon : '';
-    document.getElementById('cat-name-input').value = editName;
-    document.getElementById('cat-name-input').disabled = true;
-  } else {
-    document.getElementById('cat-icon-input').value = '';
-    document.getElementById('cat-name-input').value = '';
-    document.getElementById('cat-name-input').disabled = false;
-  }
-  document.getElementById('category-modal-overlay').classList.remove('hidden');
-}
-
-function closeCategoryModal(e) {
-  if (e && e.target !== document.getElementById('category-modal-overlay')) return;
-  document.getElementById('category-modal-overlay').classList.add('hidden');
-}
-
-async function submitCategory(e) {
-  e.preventDefault();
-  const type     = document.getElementById('cat-type').value;
-  const editName = document.getElementById('cat-edit-name').value;
-  const icon     = document.getElementById('cat-icon-input').value.trim() || '📌';
-  const name     = document.getElementById('cat-name-input').value.trim();
-  if (!name) { showToast('Escribí un nombre'); return; }
-
-  const arr = type === 'gasto' ? gastoCats : type === 'casa' ? casaCats : ingresoCats;
-
-  if (editName) {
-    const idx = arr.findIndex(c => c.name === editName);
-    if (idx >= 0) arr[idx].icon = icon;
-  } else {
-    if (arr.find(c => c.name.toLowerCase() === name.toLowerCase())) {
-      showToast('Ya existe esa categoría'); return;
-    }
-    arr.push({ name, icon });
-  }
-
-  const key = type === 'gasto' ? 'cat_gasto' : type === 'casa' ? 'cat_casa' : 'cat_ingreso';
-  await setSetting(key, arr);
-  rebuildCatIconMap();
-  document.getElementById('category-modal-overlay').classList.add('hidden');
-  renderAjustes();
-  showToast(editName ? 'Categoría actualizada' : 'Categoría agregada');
-}
-
-async function deleteCategory(type, name) {
-  if (name === 'Otros') { showToast('No podés eliminar "Otros"'); return; }
-  if (!confirm(`¿Eliminar la categoría "${name}"?`)) return;
-  const arr = type === 'gasto' ? gastoCats : type === 'casa' ? casaCats : ingresoCats;
-  const filtered = arr.filter(c => c.name !== name);
-  if (type === 'gasto')   gastoCats   = filtered;
-  if (type === 'casa')    casaCats    = filtered;
-  if (type === 'ingreso') ingresoCats = filtered;
-  const key = type === 'gasto' ? 'cat_gasto' : type === 'casa' ? 'cat_casa' : 'cat_ingreso';
-  await setSetting(key, filtered);
-  rebuildCatIconMap();
-  renderAjustes();
-  showToast('Categoría eliminada');
-}
-
-/* ===========================
-   EXPORTAR / IMPORTAR
-   =========================== */
-async function exportData() {
-  showToast('Preparando backup...');
-  const data = {
-    transactions:  await dbGetAll('transactions'),
-    budget:        await dbGetAll('budget'),
-    reminders:     await dbGetAll('reminders'),
-    super_items:   await dbGetAll('super_items'),
-    super_history: await dbGetAll('super_history'),
-    settings:      await dbGetAll('settings'),
-  };
-  const payload = {
-    app: 'finanzio', version: 1,
-    exportedAt: new Date().toISOString(),
-    data
-  };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href     = url;
-  a.download = `finanzio-backup-${new Date().toISOString().split('T')[0]}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast('Backup descargado ✓');
-}
-
-async function importData(file) {
-  let parsed;
-  try {
-    const text = await file.text();
-    parsed = JSON.parse(text);
-  } catch {
-    showToast('Archivo inválido'); return;
-  }
-  const { data } = parsed;
-  const required = ['transactions','budget','reminders','super_items','super_history','settings'];
-  if (!data || required.some(k => !Array.isArray(data[k]))) {
-    showToast('Archivo inválido o incompleto'); return;
-  }
-  if (!confirm('Esto va a reemplazar TODOS tus datos actuales con los del backup. ¿Continuar?')) return;
-
-  showToast('Importando...');
-  const stores = ['transactions','budget','reminders','super_items','super_history','settings'];
-  for (const store of stores) {
-    await dbClear(store);
-    for (const item of data[store]) { await dbPut(store, item); }
-  }
-
-  await loadAll();
-  await loadCategories();
-  rebuildCatIconMap();
-  navigate(currentView);
-  renderDashboard();
-  showToast('Datos importados correctamente ✓');
-}
-
 function showToast(msg) {
+  const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.remove('hidden', 'fade-out');
   clearTimeout(window._toastTimer);

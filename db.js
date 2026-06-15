@@ -51,13 +51,9 @@ async function dbAdd(storeName, item) {
   const d = await openDB();
   return new Promise((resolve, reject) => {
     const tx = d.transaction(storeName, 'readwrite');
-    let newId;
     const req = tx.objectStore(storeName).add(item);
-    req.onsuccess = () => { newId = req.result; };
+    req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
-    tx.oncomplete = () => resolve(newId);
-    tx.onerror = () => reject(tx.error);
-    tx.onabort = () => reject(tx.error);
   });
 }
 
@@ -66,10 +62,8 @@ async function dbPut(storeName, item) {
   return new Promise((resolve, reject) => {
     const tx = d.transaction(storeName, 'readwrite');
     const req = tx.objectStore(storeName).put(item);
+    req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-    tx.onabort = () => reject(tx.error);
   });
 }
 
@@ -77,10 +71,9 @@ async function dbDelete(storeName, key) {
   const d = await openDB();
   return new Promise((resolve, reject) => {
     const tx = d.transaction(storeName, 'readwrite');
-    tx.objectStore(storeName).delete(key);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-    tx.onabort = () => reject(tx.error);
+    const req = tx.objectStore(storeName).delete(key);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
   });
 }
 
@@ -94,31 +87,11 @@ async function dbGet(storeName, key) {
   });
 }
 
-async function dbClear(storeName) {
-  const d = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = d.transaction(storeName, 'readwrite');
-    tx.objectStore(storeName).clear();
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-    tx.onabort = () => reject(tx.error);
-  });
-}
-
 async function getSetting(key, defaultVal = null) {
-  try {
-    const row = await dbGet('settings', key);
-    return (row && row.value !== undefined && row.value !== null) ? row.value : defaultVal;
-  } catch {
-    return defaultVal;
-  }
+  const row = await dbGet('settings', key);
+  return row ? row.value : defaultVal;
 }
 
 async function setSetting(key, value) {
-  try {
-    await dbPut('settings', { key, value });
-  } catch (e) {
-    console.error('setSetting error:', key, e);
-    throw e;
-  }
+  await dbPut('settings', { key, value });
 }

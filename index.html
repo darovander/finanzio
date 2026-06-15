@@ -60,7 +60,7 @@
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2a6 6 0 0 1 6 6c0 3.5 1.5 5 1.5 5h-15S4 11.5 4 8a6 6 0 0 1 6-6Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8.5 17a1.5 1.5 0 0 0 3 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
           <span class="notif-badge hidden" id="notif-badge">0</span>
         </button>
-        <button class="header-icon-btn" id="settings-btn" onclick="navigate('ajustes')" aria-label="Ajustes">
+        <button class="header-icon-btn" id="settings-btn" onclick="openSettingsModal()" aria-label="Configuración">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.22 4.22l1.42 1.42M14.36 14.36l1.42 1.42M4.22 15.78l1.42-1.42M14.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         </button>
       </div>
@@ -264,88 +264,6 @@
       <!-- RECORDATORIOS VIEW -->
       <section id="view-recordatorios" class="view">
         <div id="recordatorios-list" class="tx-list padded"></div>
-      </section>
-
-      <!-- AJUSTES VIEW -->
-      <section id="view-ajustes" class="view">
-
-        <!-- Bloque Datos -->
-        <div class="section-block">
-          <div class="section-header">
-            <h3 class="section-title">💾 Datos</h3>
-          </div>
-          <p class="section-hint">Exportá un backup de todos tus datos o importá uno guardado.</p>
-          <div style="display:flex;gap:10px">
-            <button id="export-data-btn" class="btn-secondary" style="flex:1">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="vertical-align:-2px;margin-right:4px"><path d="M8 2v8M5 7l3 3 3-3M2 11v1.5A1.5 1.5 0 0 0 3.5 14h9A1.5 1.5 0 0 0 14 12.5V11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              Exportar
-            </button>
-            <button id="import-data-btn" class="btn-secondary" style="flex:1">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="vertical-align:-2px;margin-right:4px"><path d="M8 10V2M5 5l3-3 3 3M2 11v1.5A1.5 1.5 0 0 0 3.5 14h9A1.5 1.5 0 0 0 14 12.5V11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              Importar
-            </button>
-          </div>
-          <input type="file" id="import-file-input" accept="application/json" class="hidden" />
-        </div>
-
-        <!-- Bloque Categorías Gastos -->
-        <div class="section-block">
-          <div class="section-header">
-            <h3 class="section-title">💸 Categorías de Gastos</h3>
-          </div>
-          <div id="cat-list-gasto" class="budget-config-list"></div>
-          <button id="add-cat-gasto-btn" class="btn-secondary full-width mt-2">+ Agregar categoría</button>
-        </div>
-
-        <!-- Bloque Categorías Casa -->
-        <div class="section-block">
-          <div class="section-header">
-            <h3 class="section-title">🏠 Categorías de Casa</h3>
-          </div>
-          <div id="cat-list-casa" class="budget-config-list"></div>
-          <button id="add-cat-casa-btn" class="btn-secondary full-width mt-2">+ Agregar categoría</button>
-        </div>
-
-        <!-- Bloque Categorías Ingresos -->
-        <div class="section-block">
-          <div class="section-header">
-            <h3 class="section-title">💵 Categorías de Ingresos</h3>
-          </div>
-          <div id="cat-list-ingreso" class="budget-config-list"></div>
-          <button id="add-cat-ingreso-btn" class="btn-secondary full-width mt-2">+ Agregar categoría</button>
-        </div>
-
-        <!-- API Key -->
-        <div class="section-block">
-          <div class="section-header">
-            <h3 class="section-title">✨ Escaneo con IA</h3>
-          </div>
-          <p class="section-hint">Configurá tu clave de Groq para escanear tickets automáticamente.</p>
-          <div id="api-key-not-set" class="api-status api-status-warn">⚠️ Sin configurar</div>
-          <div id="api-key-set" class="api-status api-status-ok hidden">✅ IA activada</div>
-          <div class="form-group" style="margin-top:12px">
-            <label class="form-label">API Key de Groq</label>
-            <input type="password" id="groq-api-key" class="form-input" placeholder="gsk_..." autocomplete="off" />
-          </div>
-          <div class="form-actions-row" style="margin-top:8px">
-            <button type="button" class="btn-secondary" onclick="testGroqKey()">Probar</button>
-            <button type="button" class="btn-primary" onclick="saveGroqKey()">Guardar</button>
-          </div>
-          <button type="button" class="link-btn-block" onclick="toggleInstructions()">¿Cómo conseguir la clave? (gratis)</button>
-          <div id="api-instructions" class="instructions-box hidden">
-            <p class="instructions-title">Paso a paso (2 minutos):</p>
-            <ol class="instructions-list">
-              <li>Entrá a <a href="https://console.groq.com" target="_blank" rel="noopener">console.groq.com</a></li>
-              <li>Tocá <strong>Sign Up</strong> con tu Gmail (sin tarjeta)</li>
-              <li>Andá a <strong>API Keys</strong> → <strong>Create API Key</strong></li>
-              <li>Copiá la clave que empieza con <code>gsk_...</code></li>
-              <li>Pegala arriba y guardá</li>
-            </ol>
-            <p class="instructions-warn">⚠️ La clave se guarda solo en tu celu. No la compartas.</p>
-          </div>
-          <button type="button" class="link-btn-block danger" id="clear-key-btn" onclick="clearGroqKey()">Borrar clave guardada</button>
-        </div>
-
       </section>
 
     </main>
@@ -560,33 +478,7 @@
       </div>
     </div>
 
-    <!-- Category Modal -->
-    <div id="category-modal-overlay" class="modal-overlay hidden" onclick="closeCategoryModal(event)">
-      <div class="modal-sheet">
-        <div class="modal-handle"></div>
-        <div class="modal-header">
-          <h3 class="modal-title" id="cat-modal-title">Nueva categoría</h3>
-          <button class="modal-close" onclick="closeCategoryModal()" aria-label="Cerrar">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-          </button>
-        </div>
-        <form id="category-form" class="modal-form" onsubmit="submitCategory(event)">
-          <input type="hidden" id="cat-type" value="" />
-          <input type="hidden" id="cat-edit-name" value="" />
-          <div class="form-group">
-            <label class="form-label">Ícono (emoji)</label>
-            <input type="text" id="cat-icon-input" class="form-input" placeholder="Ej: 🛒" maxlength="4" style="font-size:24px;text-align:center" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Nombre</label>
-            <input type="text" id="cat-name-input" class="form-input" placeholder="Ej: Mascota" maxlength="30" required />
-          </div>
-          <button type="submit" class="btn-primary full-width">Guardar</button>
-        </form>
-      </div>
-    </div>
-
-    <!-- Settings Modal (API Key - legacy, now in Ajustes view) -->
+    <!-- Settings Modal -->
     <div id="settings-modal-overlay" class="modal-overlay hidden" onclick="closeSettingsModal(event)">
       <div class="modal-sheet">
         <div class="modal-handle"></div>

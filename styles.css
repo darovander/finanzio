@@ -722,5 +722,4 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
 @media (prefers-color-scheme: dark) { [data-theme="auto"] .instructions-warn { background: rgba(245,158,11,0.1); } }
 
 /* === UTILS === */
-.cat-config-icon { font-size: 20px; width: 28px; text-align: center; flex-shrink: 0; }
 .hidden { display: none !important; }
