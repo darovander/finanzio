@@ -39,11 +39,34 @@ window.addEventListener('DOMContentLoaded', async () => {
   setupBudgetHandlers();
   setupFilterChips();
   setupTicketUpload();
+  setupModalOverlayClose();
   navigate('dashboard');
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   }
 });
+
+function setupModalOverlayClose() {
+  // Cerrar modal al tocar el fondo oscuro, pero NO al tocar el sheet
+  const overlay = document.getElementById('modal-overlay');
+  const sheet   = document.getElementById('modal-sheet');
+  if (overlay && sheet) {
+    sheet.addEventListener('click', e => e.stopPropagation());
+    overlay.addEventListener('click', () => {
+      overlay.classList.add('hidden');
+      overlay.style.display = '';
+      document.getElementById('transaction-form').reset();
+      document.getElementById('ticket-preview').classList.add('hidden');
+      document.getElementById('ticket-actions-row').classList.remove('hidden');
+      document.getElementById('ticket-remove').classList.add('hidden');
+      document.getElementById('ocr-result').classList.add('hidden');
+      document.getElementById('ocr-status').classList.add('hidden');
+      selectedCategory = '';
+      editingTxId = null;
+      ticketDataUrl = null;
+    });
+  }
+}
 
 async function loadAll() {
   allTransactions = await dbGetAll('transactions');
@@ -590,9 +613,10 @@ function openAddModal(type) {
 
   renderCategoryChips(type);
   selectedCategory = '';
+
   const overlay = document.getElementById('modal-overlay');
-  overlay.style.display = '';
-  document.getElementById('modal-overlay').classList.remove('hidden');
+  overlay.style.display = '';          // limpiar inline style por si quedó algo
+  overlay.classList.remove('hidden');
   setTimeout(() => document.getElementById('tx-amount').focus(), 300);
 }
 
@@ -647,11 +671,13 @@ function selectCategory(cat) {
 }
 
 function closeModal(e) {
-  if (e && e.target !== document.getElementById('modal-overlay')) return;
+  // Si viene de un click en el overlay, ya lo maneja setupModalOverlayClose
+  // Esta función se llama programáticamente (submit, botón X)
   const overlay = document.getElementById('modal-overlay');
   overlay.classList.add('hidden');
-  overlay.style.display = 'none';
-  document.getElementById('transaction-form').reset();
+  overlay.style.display = '';
+  if (document.getElementById('transaction-form'))
+    document.getElementById('transaction-form').reset();
   document.getElementById('ticket-preview').classList.add('hidden');
   document.getElementById('ticket-actions-row').classList.remove('hidden');
   document.getElementById('ticket-remove').classList.add('hidden');

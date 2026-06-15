@@ -18,21 +18,16 @@ function openDB() {
         ts.createIndex('date', 'date');
         ts.createIndex('category', 'category');
       }
-      if (!d.objectStoreNames.contains('super_items')) {
+      if (!d.objectStoreNames.contains('super_items'))
         d.createObjectStore('super_items', { keyPath: 'id', autoIncrement: true });
-      }
-      if (!d.objectStoreNames.contains('super_history')) {
+      if (!d.objectStoreNames.contains('super_history'))
         d.createObjectStore('super_history', { keyPath: 'id', autoIncrement: true });
-      }
-      if (!d.objectStoreNames.contains('budget')) {
+      if (!d.objectStoreNames.contains('budget'))
         d.createObjectStore('budget', { keyPath: 'category' });
-      }
-      if (!d.objectStoreNames.contains('reminders')) {
+      if (!d.objectStoreNames.contains('reminders'))
         d.createObjectStore('reminders', { keyPath: 'id', autoIncrement: true });
-      }
-      if (!d.objectStoreNames.contains('settings')) {
+      if (!d.objectStoreNames.contains('settings'))
         d.createObjectStore('settings', { keyPath: 'key' });
-      }
     };
   });
 }
@@ -51,9 +46,13 @@ async function dbAdd(storeName, item) {
   const d = await openDB();
   return new Promise((resolve, reject) => {
     const tx = d.transaction(storeName, 'readwrite');
+    let newId;
     const req = tx.objectStore(storeName).add(item);
-    req.onsuccess = () => resolve(req.result);
+    req.onsuccess = () => { newId = req.result; };
     req.onerror = () => reject(req.error);
+    tx.oncomplete = () => resolve(newId);
+    tx.onerror   = () => reject(tx.error);
+    tx.onabort   = () => reject(new Error('Transaction aborted'));
   });
 }
 
@@ -62,8 +61,10 @@ async function dbPut(storeName, item) {
   return new Promise((resolve, reject) => {
     const tx = d.transaction(storeName, 'readwrite');
     const req = tx.objectStore(storeName).put(item);
-    req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
+    tx.oncomplete = () => resolve();
+    tx.onerror   = () => reject(tx.error);
+    tx.onabort   = () => reject(new Error('Transaction aborted'));
   });
 }
 
@@ -71,9 +72,10 @@ async function dbDelete(storeName, key) {
   const d = await openDB();
   return new Promise((resolve, reject) => {
     const tx = d.transaction(storeName, 'readwrite');
-    const req = tx.objectStore(storeName).delete(key);
-    req.onsuccess = () => resolve();
-    req.onerror = () => reject(req.error);
+    tx.objectStore(storeName).delete(key);
+    tx.oncomplete = () => resolve();
+    tx.onerror   = () => reject(tx.error);
+    tx.onabort   = () => reject(new Error('Transaction aborted'));
   });
 }
 
@@ -87,9 +89,22 @@ async function dbGet(storeName, key) {
   });
 }
 
+async function dbClear(storeName) {
+  const d = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = d.transaction(storeName, 'readwrite');
+    tx.objectStore(storeName).clear();
+    tx.oncomplete = () => resolve();
+    tx.onerror   = () => reject(tx.error);
+    tx.onabort   = () => reject(new Error('Transaction aborted'));
+  });
+}
+
 async function getSetting(key, defaultVal = null) {
-  const row = await dbGet('settings', key);
-  return row ? row.value : defaultVal;
+  try {
+    const row = await dbGet('settings', key);
+    return (row && row.value !== undefined && row.value !== null) ? row.value : defaultVal;
+  } catch { return defaultVal; }
 }
 
 async function setSetting(key, value) {
