@@ -723,3 +723,50 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
 
 /* === UTILS === */
 .hidden { display: none !important; }
+
+/* === CONFIGURACIÓN === */
+.cfg-cat-list { display:flex; flex-direction:column; gap:6px; margin-bottom:4px; }
+.cfg-cat-row {
+  display:flex; align-items:center; gap:10px;
+  background:var(--surface-2); border:0.5px solid var(--border);
+  border-radius:var(--radius-md); padding:10px 12px;
+}
+.cfg-cat-icon { font-size:20px; width:26px; text-align:center; flex-shrink:0; }
+.cfg-cat-name { flex:1; font-size:14px; font-weight:500; color:var(--text-1); }
+
+/* Reusar clases existentes de settings */
+.form-actions-row { display:flex; gap:8px; margin-top:8px; }
+.form-actions-row > button { flex:1; }
+.link-btn-block {
+  background:transparent; color:var(--purple);
+  text-align:center; font-size:13px; font-weight:500;
+  padding:10px; border-radius:var(--radius-md); width:100%; display:block;
+}
+.link-btn-block:active { background:var(--surface-2); }
+.link-btn-block.danger { color:var(--red); }
+.instructions-box {
+  background:var(--surface-2); border:1px solid var(--border);
+  border-radius:var(--radius-md); padding:14px; margin-top:4px;
+}
+.instructions-title { font-size:13px; font-weight:700; color:var(--text-1); margin-bottom:8px; }
+.instructions-list {
+  padding-left:20px; font-size:13px; color:var(--text-2);
+  display:flex; flex-direction:column; gap:5px; line-height:1.5;
+}
+.instructions-list a { color:var(--purple); font-weight:600; }
+.instructions-warn {
+  font-size:12px; color:var(--amber); margin-top:8px;
+  padding:8px; background:rgba(245,158,11,0.1); border-radius:var(--radius-sm);
+}
+.api-status {
+  padding:10px 14px; border-radius:var(--radius-md);
+  font-size:13px; font-weight:600; text-align:center; margin-top:4px;
+}
+.api-status-warn { background:var(--amber-light); color:#B45309; }
+.api-status-ok   { background:var(--green-light); color:var(--green-dark); }
+[data-theme="dark"] .api-status-warn { background:rgba(245,158,11,0.15); color:#FCD34D; }
+[data-theme="dark"] .api-status-ok   { background:rgba(16,185,129,0.15); color:#6EE7B7; }
+@media (prefers-color-scheme:dark) {
+  [data-theme="auto"] .api-status-warn { background:rgba(245,158,11,0.15); color:#FCD34D; }
+  [data-theme="auto"] .api-status-ok   { background:rgba(16,185,129,0.15); color:#6EE7B7; }
+}

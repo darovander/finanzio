@@ -60,6 +60,9 @@
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2a6 6 0 0 1 6 6c0 3.5 1.5 5 1.5 5h-15S4 11.5 4 8a6 6 0 0 1 6-6Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8.5 17a1.5 1.5 0 0 0 3 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
           <span class="notif-badge hidden" id="notif-badge">0</span>
         </button>
+        <button class="header-icon-btn" onclick="navigate('configuracion')" aria-label="Configuración">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.22 4.22l1.42 1.42M14.36 14.36l1.42 1.42M4.22 15.78l1.42-1.42M14.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
         <button class="header-icon-btn" id="settings-btn" onclick="openSettingsModal()" aria-label="Configuración">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.22 4.22l1.42 1.42M14.36 14.36l1.42 1.42M4.22 15.78l1.42-1.42M14.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         </button>
@@ -264,6 +267,104 @@
       <!-- RECORDATORIOS VIEW -->
       <section id="view-recordatorios" class="view">
         <div id="recordatorios-list" class="tx-list padded"></div>
+      </section>
+
+      <!-- CONFIGURACIÓN VIEW -->
+      <section id="view-configuracion" class="view">
+
+        <!-- Preferencias generales -->
+        <div class="section-block">
+          <h3 class="section-title">👤 Preferencias</h3>
+          <div class="form-group" style="margin-top:12px">
+            <label class="form-label">Tu nombre (opcional)</label>
+            <input type="text" id="cfg-nombre" class="form-input" placeholder="Ej: Dario" maxlength="30" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Símbolo de moneda</label>
+            <input type="text" id="cfg-moneda" class="form-input" placeholder="$" maxlength="4" style="max-width:80px" />
+          </div>
+          <button id="cfg-save-prefs-btn" class="btn-primary full-width" style="margin-top:4px">Guardar preferencias</button>
+        </div>
+
+        <!-- Apariencia -->
+        <div class="section-block">
+          <h3 class="section-title">🎨 Apariencia</h3>
+          <p class="section-hint">Cambiá el tema desde el ícono ☀️/🌙 en el header.</p>
+        </div>
+
+        <!-- Categorías de Gastos -->
+        <div class="section-block">
+          <div class="section-header">
+            <h3 class="section-title">💸 Categorías de Gastos</h3>
+          </div>
+          <div id="cfg-cat-gasto" class="cfg-cat-list"></div>
+          <button id="cfg-add-gasto-btn" class="btn-secondary full-width mt-2">+ Agregar categoría</button>
+        </div>
+
+        <!-- Categorías de Casa -->
+        <div class="section-block">
+          <div class="section-header">
+            <h3 class="section-title">🏠 Categorías de Casa</h3>
+          </div>
+          <div id="cfg-cat-casa" class="cfg-cat-list"></div>
+          <button id="cfg-add-casa-btn" class="btn-secondary full-width mt-2">+ Agregar categoría</button>
+        </div>
+
+        <!-- Categorías de Ingresos -->
+        <div class="section-block">
+          <div class="section-header">
+            <h3 class="section-title">💵 Categorías de Ingresos</h3>
+          </div>
+          <div id="cfg-cat-ingreso" class="cfg-cat-list"></div>
+          <button id="cfg-add-ingreso-btn" class="btn-secondary full-width mt-2">+ Agregar categoría</button>
+        </div>
+
+        <!-- IA Groq -->
+        <div class="section-block">
+          <h3 class="section-title">✨ Escaneo con IA (Groq)</h3>
+          <p class="section-hint">Escaneá tickets automáticamente con inteligencia artificial. Necesitás una clave gratuita de Groq.</p>
+          <div id="cfg-key-not-set" class="api-status api-status-warn" style="margin-top:8px">⚠️ Sin configurar</div>
+          <div id="cfg-key-set" class="api-status api-status-ok hidden" style="margin-top:8px">✅ IA activada</div>
+          <div class="form-group" style="margin-top:12px">
+            <label class="form-label">API Key de Groq</label>
+            <input type="password" id="cfg-groq-key" class="form-input" placeholder="gsk_..." autocomplete="off" />
+          </div>
+          <div class="form-actions-row">
+            <button id="cfg-test-key-btn" class="btn-secondary">Probar</button>
+            <button id="cfg-save-key-btn" class="btn-primary">Guardar</button>
+          </div>
+          <button class="link-btn-block" id="cfg-show-instructions">¿Cómo conseguir la clave? (gratis)</button>
+          <div id="cfg-instructions" class="instructions-box hidden">
+            <p class="instructions-title">Paso a paso (2 min):</p>
+            <ol class="instructions-list">
+              <li>Entrá a <a href="https://console.groq.com" target="_blank" rel="noopener">console.groq.com</a></li>
+              <li>Sign Up con Gmail (sin tarjeta de crédito)</li>
+              <li>Menú izquierdo → <strong>API Keys</strong> → <strong>Create API Key</strong></li>
+              <li>Copiá la clave y pegala arriba</li>
+              <li>Tocá Guardar</li>
+            </ol>
+            <p class="instructions-warn">⚠️ La clave se guarda solo en tu celu.</p>
+          </div>
+          <button class="link-btn-block danger" id="cfg-clear-key-btn">Borrar clave guardada</button>
+        </div>
+
+        <!-- Datos -->
+        <div class="section-block">
+          <h3 class="section-title">💾 Datos</h3>
+          <p class="section-hint">Exportá un backup completo o restaurá uno anterior.</p>
+          <div style="display:flex;gap:10px;margin-top:8px">
+            <button id="cfg-export-btn" class="btn-secondary" style="flex:1">⬇ Exportar</button>
+            <button id="cfg-import-btn" class="btn-secondary" style="flex:1">⬆ Importar</button>
+          </div>
+          <input type="file" id="cfg-import-file" accept="application/json" class="hidden" />
+        </div>
+
+        <!-- Acerca de -->
+        <div class="section-block" style="padding-bottom:24px">
+          <h3 class="section-title">ℹ️ Acerca de</h3>
+          <p class="section-hint" style="margin-top:8px">Finanzio v1.0 · Tu asistente financiero personal · Datos guardados en este dispositivo.</p>
+        </div>
+
       </section>
 
     </main>
@@ -490,49 +591,57 @@
         </div>
         <div class="modal-form">
           <div class="settings-section">
-            <h4 class="settings-section-title">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="vertical-align:-3px"><path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-              Escaneo con IA
-            </h4>
-            <p class="settings-hint">Para escanear tickets con inteligencia artificial necesitás una clave gratuita de Groq.</p>
-
-            <div id="api-key-not-set" class="api-status api-status-warn">
-              <span>⚠️ Sin configurar</span>
-            </div>
-            <div id="api-key-set" class="api-status api-status-ok hidden">
-              <span>✅ IA activada</span>
-            </div>
-
+            <h4 class="settings-section-title">✨ Escaneo con IA (Groq)</h4>
+            <p class="settings-hint">Para escanear tickets con IA necesitás una clave gratuita de Groq.</p>
+            <div id="api-key-not-set" class="api-status api-status-warn">⚠️ Sin configurar</div>
+            <div id="api-key-set" class="api-status api-status-ok hidden">✅ IA activada</div>
             <div class="form-group">
               <label class="form-label">API Key de Groq</label>
               <input type="password" id="groq-api-key" class="form-input" placeholder="gsk_..." autocomplete="off" />
             </div>
-
             <div class="form-actions-row">
-              <button type="button" class="btn-secondary" onclick="testGroqKey()">Probar conexión</button>
+              <button type="button" class="btn-secondary" onclick="testGroqKey()">Probar</button>
               <button type="button" class="btn-primary" onclick="saveGroqKey()">Guardar</button>
             </div>
-
-            <button type="button" class="link-btn-block" id="show-instructions-btn" onclick="toggleInstructions()">
-              ¿Cómo conseguir la clave? (es gratis)
-            </button>
-
+            <button type="button" class="link-btn-block" onclick="toggleInstructions()">¿Cómo conseguir la clave? (gratis)</button>
             <div id="api-instructions" class="instructions-box hidden">
-              <p class="instructions-title">Paso a paso (2 minutos):</p>
+              <p class="instructions-title">Paso a paso:</p>
               <ol class="instructions-list">
-                <li>Entrá a <a href="https://console.groq.com" target="_blank" rel="noopener">console.groq.com</a> en tu navegador</li>
-                <li>Tocá <strong>Sign Up</strong> y entrá con tu Gmail (no pide tarjeta)</li>
-                <li>Una vez adentro, andá a <strong>API Keys</strong> en el menú izquierdo</li>
-                <li>Tocá <strong>Create API Key</strong>, ponele un nombre como "Finanzio"</li>
-                <li>Copiá la clave que empieza con <code>gsk_...</code></li>
-                <li>Volvé acá, pegala arriba y guardá</li>
+                <li>Entrá a <a href="https://console.groq.com" target="_blank">console.groq.com</a></li>
+                <li>Sign Up con Gmail (sin tarjeta)</li>
+                <li>API Keys → Create API Key → copiá la clave</li>
+                <li>Pegala arriba y guardá</li>
               </ol>
-              <p class="instructions-warn">⚠️ La clave se guarda solo en tu celu. No la compartas con nadie.</p>
             </div>
-
-            <button type="button" class="link-btn-block danger" id="clear-key-btn" onclick="clearGroqKey()">Borrar clave guardada</button>
+            <button type="button" class="link-btn-block danger" id="clear-key-btn" onclick="clearGroqKey()">Borrar clave</button>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Modal Categoría -->
+    <div id="cat-modal-overlay" class="modal-overlay hidden">
+      <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <div class="modal-header">
+          <h3 class="modal-title" id="cat-modal-title">Nueva categoría</h3>
+          <button class="modal-close" id="cat-modal-close" aria-label="Cerrar">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <form id="cat-modal-form" class="modal-form">
+          <input type="hidden" id="cat-modal-type" />
+          <input type="hidden" id="cat-modal-edit-name" />
+          <div class="form-group">
+            <label class="form-label">Ícono (emoji)</label>
+            <input type="text" id="cat-modal-icon" class="form-input" placeholder="🛒" maxlength="4" style="font-size:24px;text-align:center" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nombre</label>
+            <input type="text" id="cat-modal-name" class="form-input" placeholder="Ej: Mascota" maxlength="30" required />
+          </div>
+          <button type="submit" class="btn-primary full-width">Guardar</button>
+        </form>
       </div>
     </div>
 
