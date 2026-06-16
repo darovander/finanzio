@@ -107,6 +107,15 @@
           </div>
         </div>
 
+        <!-- Accesos Rápidos -->
+        <div class="section-block">
+          <div class="section-header">
+            <h3 class="section-title">⚡ Accesos rápidos</h3>
+            <button class="section-link" onclick="openShortcutEditor()">Editar</button>
+          </div>
+          <div id="quick-shortcuts-grid" class="shortcuts-grid"></div>
+        </div>
+
         <!-- Budget Overview Bar -->
         <div class="section-block" id="budget-overview-block">
           <div class="section-header">
@@ -479,6 +488,11 @@
             </div>
           </div>
 
+          <button type="button" id="voice-input-btn" class="btn-voice" onclick="startVoiceInput()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3Z" stroke="currentColor" stroke-width="1.6"/><path d="M19 10a7 7 0 0 1-14 0M12 19v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            Hablar
+          </button>
+
           <button type="submit" class="btn-primary full-width" id="submit-btn">Guardar</button>
         </form>
       </div>
@@ -613,6 +627,44 @@
             <button type="button" class="link-btn-block danger" id="clear-key-btn" onclick="clearGroqKey()">Borrar clave</button>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Modal Acceso Rápido -->
+    <div id="shortcut-modal-overlay" class="modal-overlay hidden">
+      <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <div class="modal-header">
+          <h3 class="modal-title" id="sc-modal-title">Nuevo acceso rápido</h3>
+          <button class="modal-close" id="sc-close-btn" aria-label="Cerrar">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <form id="sc-form" class="modal-form">
+          <input type="hidden" id="sc-edit-idx" value="" />
+          <div class="form-group">
+            <label class="form-label">Ícono (emoji)</label>
+            <input type="text" id="sc-icon" class="form-input" placeholder="⛽" maxlength="4" style="font-size:24px;text-align:center" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nombre del acceso</label>
+            <input type="text" id="sc-label" class="form-input" placeholder="Ej: Nafta, Almuerzo..." maxlength="20" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tipo</label>
+            <select id="sc-type" class="form-input form-select">
+              <option value="gasto">💸 Gasto</option>
+              <option value="ingreso">💵 Ingreso</option>
+              <option value="casa">🏠 Casa</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Categoría (opcional)</label>
+            <select id="sc-category" class="form-input form-select"></select>
+          </div>
+          <button type="submit" class="btn-primary full-width">Guardar</button>
+          <button type="button" id="sc-del-btn" class="btn-danger full-width hidden">Eliminar acceso</button>
+        </form>
       </div>
     </div>
 

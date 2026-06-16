@@ -36,6 +36,11 @@ let gastoCats   = [...DEFAULT_GASTO_CATS];
 let casaCats    = [...DEFAULT_CASA_CATS];
 let ingresoCats = [...DEFAULT_INGRESO_CATS];
 let catIconMap  = {};
+let isRecording = false;
+let mediaRecorder = null;
+let audioChunks  = [];
+let quickShortcuts = []; // [{label, type, category, icon}]
+let autoCatTimer   = null;
 
 function rebuildCatIconMap() {
   catIconMap = {};
@@ -59,6 +64,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   setupTicketUpload();
   setupModalOverlayClose();
   setupConfigHandlers();
+  setupAutoCat();
+  await loadQuickShortcuts();
+  setupShortcutModal();
   navigate('dashboard');
   if ('serviceWorker' in navigator)
     navigator.serviceWorker.register('sw.js').catch(()=>{});
@@ -151,6 +159,7 @@ function renderDashboard() {
 
   renderHealthScore(totalGastos, totalIngresos, monthTxs.length);
   renderBudgetOverview(gastos);
+  renderQuickShortcuts();
   renderRecentList(monthTxs);
   renderNavCardSubs(gastos, ingresos, totalGastos, totalIngresos);
   renderTips(gastos, ingresos, totalGastos, totalIngresos);
@@ -1239,6 +1248,285 @@ function getTopCategory(txs) {
   txs.filter(t => t.type!=='ingreso' && t.category).forEach(t => { map[t.category] = (map[t.category]||0)+t.amount; });
   const sorted = Object.entries(map).sort((a,b) => b[1]-a[1]);
   return sorted.length ? {category:sorted[0][0], total:sorted[0][1]} : null;
+}
+
+/* ===========================
+   1. CATEGORIZACIÓN AUTOMÁTICA
+   =========================== */
+function setupAutoCat() {
+  // Se hookea al campo descripción del modal
+  document.getElementById('tx-desc').addEventListener('input', function() {
+    clearTimeout(autoCatTimer);
+    const desc = this.value.trim();
+    if (desc.length < 3 || selectedCategory) return;
+    autoCatTimer = setTimeout(() => suggestCategoryAI(desc), 700);
+  });
+}
+
+async function suggestCategoryAI(desc) {
+  const apiKey = await getSetting('groqApiKey');
+  if (!apiKey) return;
+  const type = document.getElementById('tx-type').value;
+  if (type === 'ingreso' || type === 'recordatorio') return;
+  const cats = type === 'casa' ? casaCats.map(c=>c.name) : gastoCats.map(c=>c.name);
+
+  try {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+        messages: [{
+          role: 'user',
+          content: `Dado este gasto: "${desc}", ¿cuál de estas categorías corresponde? [${cats.join(', ')}]. Respondé SOLO con el nombre exacto de una categoría de la lista, sin explicación.`
+        }],
+        temperature: 0.1, max_tokens: 20
+      })
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const suggested = data.choices?.[0]?.message?.content?.trim();
+    if (!suggested || selectedCategory) return;
+    const match = cats.find(c => c.toLowerCase() === suggested.toLowerCase());
+    if (match) {
+      selectCategory(match);
+      showToast(`✨ Categoría sugerida: ${match}`);
+    }
+  } catch { /* silencioso — no interrumpir al usuario */ }
+}
+
+/* ===========================
+   2. REGISTRO POR VOZ
+   =========================== */
+async function startVoiceInput() {
+  const apiKey = await getSetting('groqApiKey');
+  if (!apiKey) {
+    showToast('Configurá tu API key en ⚙️ primero');
+    return;
+  }
+
+  if (isRecording) {
+    stopVoiceInput();
+    return;
+  }
+
+  if (!navigator.mediaDevices?.getUserMedia) {
+    showToast('Tu navegador no soporta grabación de audio');
+    return;
+  }
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioChunks = [];
+    mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+    mediaRecorder.onstop = () => processVoiceInput(apiKey, stream);
+    mediaRecorder.start();
+    isRecording = true;
+    updateVoiceBtn(true);
+    showToast('🎙️ Grabando... hablá ahora');
+    // Auto-stop después de 8 segundos
+    setTimeout(() => { if (isRecording) stopVoiceInput(); }, 8000);
+  } catch (err) {
+    showToast('No se pudo acceder al micrófono');
+    console.error('Mic error:', err);
+  }
+}
+
+function stopVoiceInput() {
+  if (mediaRecorder && isRecording) {
+    mediaRecorder.stop();
+    isRecording = false;
+    updateVoiceBtn(false);
+    showToast('⏳ Procesando lo que dijiste...');
+  }
+}
+
+function updateVoiceBtn(recording) {
+  const btn = document.getElementById('voice-input-btn');
+  if (!btn) return;
+  btn.classList.toggle('voice-recording', recording);
+  btn.innerHTML = recording
+    ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg> Detener`
+    : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3Z" stroke="currentColor" stroke-width="1.6"/><path d="M19 10a7 7 0 0 1-14 0M12 19v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg> Hablar`;
+}
+
+async function processVoiceInput(apiKey, stream) {
+  stream.getTracks().forEach(t => t.stop());
+  const blob = new Blob(audioChunks, { type: 'audio/webm' });
+  if (blob.size < 1000) { showToast('Audio muy corto, intentá de nuevo'); return; }
+
+  try {
+    // Transcribir con Whisper via Groq
+    const formData = new FormData();
+    formData.append('file', blob, 'audio.webm');
+    formData.append('model', 'whisper-large-v3-turbo');
+    formData.append('language', 'es');
+    formData.append('response_format', 'json');
+
+    const transcRes = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}` },
+      body: formData
+    });
+
+    if (!transcRes.ok) throw new Error(`Transcripción ${transcRes.status}`);
+    const transcData = await transcRes.json();
+    const text = transcData.text?.trim();
+    if (!text) { showToast('No se entendió. Intentá de nuevo.'); return; }
+
+    showToast(`🎙️ "${text}"`);
+
+    // Interpretar con Llama
+    const allCats = [...gastoCats, ...casaCats, ...ingresoCats].map(c => c.name);
+    const today   = new Date().toISOString().split('T')[0];
+    const parseRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+        messages: [{
+          role: 'user',
+          content: `Interpretá este mensaje de voz sobre un gasto o ingreso en Argentina: "${text}"
+Categorías disponibles: ${allCats.join(', ')}
+Fecha hoy: ${today}
+Respondé SOLO con JSON válido:
+{"tipo":"gasto","monto":1500,"descripcion":"Nafta YPF","categoria":"Transporte","fecha":"${today}"}
+tipo puede ser: gasto, ingreso, casa. monto como número. Si no entendés algún campo usá null.`
+        }],
+        temperature: 0.1, max_tokens: 200, response_format: { type: 'json_object' }
+      })
+    });
+
+    if (!parseRes.ok) throw new Error('Error interpretando');
+    const parseData = await parseRes.json();
+    const parsed = JSON.parse(parseData.choices?.[0]?.message?.content || '{}');
+
+    if (!parsed.monto || isNaN(parsed.monto)) {
+      showToast('No entendí el monto. Abrí el formulario y cargalo a mano.');
+      return;
+    }
+
+    // Abrir modal con datos pre-cargados
+    openAddModal(parsed.tipo || 'gasto');
+    setTimeout(() => {
+      if (parsed.monto)       document.getElementById('tx-amount').value = parseFloat(parsed.monto).toFixed(2);
+      if (parsed.descripcion) document.getElementById('tx-desc').value   = parsed.descripcion;
+      if (parsed.fecha)       document.getElementById('tx-date').value   = parsed.fecha;
+      if (parsed.categoria) {
+        const type  = parsed.tipo || 'gasto';
+        const valid = type === 'ingreso' ? ingresoCats : type === 'casa' ? casaCats : gastoCats;
+        const match = valid.find(c => c.name.toLowerCase() === parsed.categoria.toLowerCase());
+        if (match) selectCategory(match.name);
+      }
+      showToast('✅ Revisá y guardá');
+    }, 400);
+
+  } catch (err) {
+    showToast('Error procesando voz. Intentá de nuevo.');
+    console.error('Voice error:', err);
+  }
+}
+
+/* ===========================
+   3. ACCESOS RÁPIDOS (dashboard)
+   =========================== */
+const DEFAULT_SHORTCUTS = [
+  { label:'Nafta',    type:'gasto',   category:'Transporte', icon:'⛽' },
+  { label:'Almuerzo', type:'gasto',   category:'Comida',     icon:'🍽️' },
+  { label:'Sueldo',   type:'ingreso', category:'Sueldo',     icon:'💼' },
+];
+
+async function loadQuickShortcuts() {
+  const saved = await getSetting('quickShortcuts');
+  quickShortcuts = saved || DEFAULT_SHORTCUTS;
+}
+
+function renderQuickShortcuts() {
+  const container = document.getElementById('quick-shortcuts-grid');
+  if (!container) return;
+  container.innerHTML = quickShortcuts.map((s, i) => `
+    <button class="shortcut-btn" onclick="openShortcut(${i})">
+      <span class="shortcut-icon">${s.icon}</span>
+      <span class="shortcut-label">${escHtml(s.label)}</span>
+    </button>`).join('') +
+    `<button class="shortcut-btn shortcut-add" onclick="openShortcutEditor()">
+      <span class="shortcut-icon">＋</span>
+      <span class="shortcut-label">Agregar</span>
+    </button>`;
+}
+
+function openShortcut(idx) {
+  const s = quickShortcuts[idx];
+  if (!s) return;
+  openAddModal(s.type);
+  setTimeout(() => {
+    if (s.category) {
+      const valid = s.type === 'ingreso' ? ingresoCats : s.type === 'casa' ? casaCats : gastoCats;
+      if (valid.find(c => c.name === s.category)) selectCategory(s.category);
+    }
+    document.getElementById('tx-amount').focus();
+  }, 350);
+}
+
+function openShortcutEditor(editIdx = null) {
+  const modal = document.getElementById('shortcut-modal-overlay');
+  const s = editIdx !== null ? quickShortcuts[editIdx] : null;
+  document.getElementById('sc-edit-idx').value  = editIdx ?? '';
+  document.getElementById('sc-icon').value       = s?.icon  || '';
+  document.getElementById('sc-label').value      = s?.label || '';
+  document.getElementById('sc-type').value       = s?.type  || 'gasto';
+  document.getElementById('sc-modal-title').textContent = s ? 'Editar acceso rápido' : 'Nuevo acceso rápido';
+  populateShortcutCatSelect(s?.type || 'gasto', s?.category);
+  document.getElementById('sc-del-btn').classList.toggle('hidden', editIdx === null);
+  modal.classList.remove('hidden');
+  document.getElementById('sc-icon').focus();
+}
+
+function populateShortcutCatSelect(type, selected) {
+  const sel  = document.getElementById('sc-category');
+  const cats = type === 'ingreso' ? ingresoCats : type === 'casa' ? casaCats : gastoCats;
+  sel.innerHTML = '<option value="">Sin categoría</option>' +
+    cats.map(c => `<option value="${escHtml(c.name)}" ${c.name===selected?'selected':''}>${c.icon} ${c.name}</option>`).join('');
+}
+
+function setupShortcutModal() {
+  document.getElementById('sc-type').addEventListener('change', function() {
+    populateShortcutCatSelect(this.value, '');
+  });
+  document.getElementById('sc-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const idx      = document.getElementById('sc-edit-idx').value;
+    const shortcut = {
+      icon:     document.getElementById('sc-icon').value.trim() || '⚡',
+      label:    document.getElementById('sc-label').value.trim(),
+      type:     document.getElementById('sc-type').value,
+      category: document.getElementById('sc-category').value,
+    };
+    if (!shortcut.label) { showToast('Escribí un nombre'); return; }
+    if (idx !== '') quickShortcuts[parseInt(idx)] = shortcut;
+    else quickShortcuts.push(shortcut);
+    await setSetting('quickShortcuts', quickShortcuts);
+    document.getElementById('shortcut-modal-overlay').classList.add('hidden');
+    renderQuickShortcuts();
+    showToast('Acceso rápido guardado ✓');
+  });
+  document.getElementById('sc-del-btn').addEventListener('click', async () => {
+    const idx = parseInt(document.getElementById('sc-edit-idx').value);
+    if (isNaN(idx)) return;
+    quickShortcuts.splice(idx, 1);
+    await setSetting('quickShortcuts', quickShortcuts);
+    document.getElementById('shortcut-modal-overlay').classList.add('hidden');
+    renderQuickShortcuts();
+    showToast('Acceso eliminado');
+  });
+  document.getElementById('shortcut-modal-overlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('shortcut-modal-overlay'))
+      document.getElementById('shortcut-modal-overlay').classList.add('hidden');
+  });
+  document.getElementById('sc-close-btn').addEventListener('click', () =>
+    document.getElementById('shortcut-modal-overlay').classList.add('hidden')
+  );
 }
 
 function showToast(msg) {
