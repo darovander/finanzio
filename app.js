@@ -856,9 +856,21 @@ async function deleteTransaction(id) {
 function setupTicketUpload() {
   document.getElementById('ticket-file').addEventListener('change', function(e) {
     const file = e.target.files[0];
-    if (!file) return;
+    if (!file) { _pendingOcrApiKey = null; return; }
     const reader = new FileReader();
-    reader.onload = ev => { ticketDataUrl = ev.target.result; showTicketPreview(); };
+    reader.onload = async (ev) => {
+      ticketDataUrl = ev.target.result;
+      showTicketPreview();
+      if (_pendingOcrApiKey) {
+        const key = _pendingOcrApiKey;
+        _pendingOcrApiKey = null;
+        await runGroqOCR(ticketDataUrl, key);
+      }
+    };
+    reader.onerror = () => {
+      showToast('No se pudo leer la imagen');
+      _pendingOcrApiKey = null;
+    };
     reader.readAsDataURL(file);
   });
 }
@@ -899,6 +911,8 @@ function actionSelect(type) {
 /* ===========================
    GROQ AI VISION
    =========================== */
+let _pendingOcrApiKey = null;
+
 async function scanTicketAI() {
   const apiKey = await getSetting('groqApiKey');
   if (!apiKey) {
@@ -907,16 +921,21 @@ async function scanTicketAI() {
     setTimeout(() => navigate('configuracion'), 300);
     return;
   }
-  const input = document.createElement('input');
-  input.type = 'file'; input.accept = 'image/*'; input.capture = 'environment';
-  input.onchange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async (ev) => { ticketDataUrl = ev.target.result; showTicketPreview(); await runGroqOCR(ticketDataUrl, apiKey); };
-    reader.readAsDataURL(file);
-  };
+  _pendingOcrApiKey = apiKey;
+  // Usamos el input fijo del HTML (no uno creado dinámicamente),
+  // porque en Android Chrome los inputs file creados con
+  // document.createElement pierden el evento 'change' al volver
+  // de la app de cámara (el elemento no persiste en el DOM real).
+  const input = document.getElementById('ticket-file');
+  input.value = ''; // permite re-seleccionar la misma foto si hace falta
   input.click();
+}
+
+async function scanTicketOnly() {
+  // Solo guardar foto sin IA (botón "Solo foto")
+  _pendingOcrApiKey = null;
+  document.getElementById('ticket-file').value = '';
+  document.getElementById('ticket-file').click();
 }
 
 async function runGroqOCR(imageDataUrl, apiKey) {
