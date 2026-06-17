@@ -55,6 +55,10 @@ window.addEventListener('DOMContentLoaded', async () => {
   await loadAll();
   await loadCategories();
   rebuildCatIconMap();
+  // Cargar quickMode en el toggle si ya existe
+  const qm = await getSetting('quickMode', false);
+  const qmEl = document.getElementById('cfg-quick-mode');
+  if (qmEl) qmEl.checked = !!qm;
   setupThemeToggle();
   setupInstallBanner();
   setupDateDefault();
@@ -130,14 +134,24 @@ async function navigate(view) {
 async function renderView(view) {
   switch(view) {
     case 'dashboard':     renderDashboard(); break;
-    case 'gastos':        renderTransactionList('gastos'); break;
+    case 'gastos':        renderDynamicFilterChips('gastos'); renderTransactionList('gastos'); break;
     case 'ingresos':      renderTransactionList('ingresos'); break;
     case 'super':         renderSuper(); break;
-    case 'casa':          renderTransactionList('casa'); break;
+    case 'casa':          renderDynamicFilterChips('casa'); renderTransactionList('casa'); break;
     case 'presupuesto':   renderPresupuesto(); break;
     case 'recordatorios': renderRecordatorios(); break;
     case 'configuracion': await renderConfiguracion(); break;
   }
+}
+
+function renderDynamicFilterChips(view) {
+  const containerId = view === 'gastos' ? 'gastos-filter-chips' : 'casa-filter-chips';
+  const cats = view === 'gastos' ? gastoCats : casaCats;
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const current = view === 'gastos' ? gastosCatFilter : casaCatFilter;
+  container.innerHTML = `<button class="chip ${current==='all'?'active':''}" data-cat="all">Todos</button>` +
+    cats.map(c => `<button class="chip ${current===c.name?'active':''}" data-cat="${escHtml(c.name)}">${c.icon} ${c.name}</button>`).join('');
 }
 
 /* ===========================
@@ -152,17 +166,89 @@ function renderDashboard() {
   const balance = totalIngresos - totalGastos;
 
   document.getElementById('month-label').textContent = formatMonthLabel(currentMonth, currentYear);
-  document.getElementById('hero-balance').textContent = formatCurrency(balance);
-  document.getElementById('hero-balance').style.color = balance >= 0 ? 'var(--green)' : 'var(--red)';
+  const balEl = document.getElementById('hero-balance');
+  balEl.textContent = formatCurrency(balance);
+  balEl.style.color = balance >= 0 ? 'var(--green)' : 'var(--red)';
   document.getElementById('hero-income').textContent  = formatCurrency(totalIngresos);
   document.getElementById('hero-expense').textContent = formatCurrency(totalGastos);
 
-  renderHealthScore(totalGastos, totalIngresos, monthTxs.length);
-  renderBudgetOverview(gastos);
+  renderDonut(gastos);
+  renderHealthScoreSimple(totalGastos, totalIngresos, monthTxs.length);
+  renderDueAlert();
+  renderBudgetOverview();
   renderQuickShortcuts();
   renderRecentList(monthTxs);
   renderNavCardSubs(gastos, ingresos, totalGastos, totalIngresos);
   renderTips(gastos, ingresos, totalGastos, totalIngresos);
+}
+
+function renderDonut(gastos) {
+  const arcsEl = document.getElementById('donut-arcs');
+  if (!arcsEl) return;
+  if (!gastos.length) { arcsEl.innerHTML = ''; return; }
+
+  // Agrupar por categoría
+  const map = {};
+  gastos.forEach(t => { map[t.category||'Otros'] = (map[t.category||'Otros']||0) + t.amount; });
+  const total = Object.values(map).reduce((s,v) => s+v, 0);
+  if (!total) { arcsEl.innerHTML = ''; return; }
+
+  const colors = ['#6C63FF','#10B981','#3B82F6','#F59E0B','#EC4899','#FF6B6B','#8B5CF6','#14B8A6'];
+  const cx = 40, cy = 40, r = 30, strokeW = 10;
+  const circumference = 2 * Math.PI * r;
+  let offset = 0;
+  const entries = Object.entries(map).sort((a,b) => b[1]-a[1]).slice(0, 6);
+
+  arcsEl.innerHTML = entries.map(([cat, val], i) => {
+    const pct   = val / total;
+    const dash  = pct * circumference;
+    const gap   = circumference - dash;
+    const rot   = (offset / total) * 360 - 90;
+    offset += val;
+    return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none"
+      stroke="${colors[i % colors.length]}" stroke-width="${strokeW}"
+      stroke-dasharray="${dash.toFixed(2)} ${gap.toFixed(2)}"
+      stroke-linecap="butt"
+      transform="rotate(${rot.toFixed(2)} ${cx} ${cy})"/>`;
+  }).join('');
+}
+
+function renderHealthScoreSimple(gastos, ingresos, txCount) {
+  let score = 100;
+  if (!ingresos && !txCount) { score = 0; }
+  else {
+    if (ingresos > 0) {
+      const r = gastos / ingresos;
+      if (r > 1) score -= 40;
+      else if (r > 0.8) score -= 20;
+      else if (r > 0.6) score -= 10;
+    }
+    score -= calcBudgetPenalty();
+    if (txCount > 0) score = Math.max(score, 10);
+  }
+  score = Math.max(0, Math.min(100, score));
+  const el = document.getElementById('health-score');
+  if (el) el.textContent = (!ingresos && !txCount) ? '--' : score;
+}
+
+function renderDueAlert() {
+  const alertEl = document.getElementById('due-alert');
+  if (!alertEl) return;
+  const urgent = allReminders.filter(r => !r.paid && isUrgent(r.dueDate));
+  const soon   = allReminders.filter(r => !r.paid && isSoon(r.dueDate));
+  if (urgent.length) {
+    alertEl.classList.remove('hidden');
+    alertEl.innerHTML = `🔴 <strong>${urgent.length} vencimiento${urgent.length>1?'s':''} urgente${urgent.length>1?'s':''}</strong> — tocá para ver`;
+    alertEl.onclick = () => navigate('recordatorios');
+  } else if (soon.length) {
+    alertEl.classList.remove('hidden');
+    alertEl.style.background = 'var(--amber-l)';
+    alertEl.style.color = 'var(--amber)';
+    alertEl.innerHTML = `🟡 <strong>${soon.length} vencimiento${soon.length>1?'s':''}</strong> esta semana`;
+    alertEl.onclick = () => navigate('recordatorios');
+  } else {
+    alertEl.classList.add('hidden');
+  }
 }
 
 function renderHealthScore(gastos, ingresos, txCount) {
@@ -211,16 +297,16 @@ function calcBudgetPenalty() {
   return Math.min(penalty, 30);
 }
 
-function renderBudgetOverview(gastos) {
+function renderBudgetOverview() {
   const container = document.getElementById('budget-bars-container');
   const empty     = document.getElementById('budget-empty');
   if (!allBudgets.length) {
-    container.innerHTML = '';
-    empty.classList.remove('hidden');
+    if (container) container.innerHTML = '';
+    empty?.classList.remove('hidden');
     return;
   }
-  empty.classList.add('hidden');
-  container.innerHTML = allBudgets.map(b => {
+  empty?.classList.add('hidden');
+  if (container) container.innerHTML = allBudgets.map(b => {
     const spent = getMonthTransactions(currentMonth, currentYear)
       .filter(t => t.category === b.category).reduce((s,t) => s+t.amount, 0);
     const pct = Math.min(100, Math.round((spent/b.limit)*100));
@@ -642,12 +728,20 @@ function openAddModal(type) {
   document.getElementById('ticket-remove').classList.add('hidden');
   document.getElementById('ocr-result').classList.add('hidden');
   document.getElementById('ocr-status').classList.add('hidden');
+  document.getElementById('autocat-hint')?.classList.add('hidden');
 
   const isReminder = type === 'recordatorio';
+  const isIngreso  = type === 'ingreso';
+  const quickMode  = document.getElementById('cfg-quick-mode')?.checked || false;
+
   document.getElementById('group-reminder').classList.toggle('hidden', !isReminder);
   document.getElementById('group-categoria').classList.toggle('hidden', isReminder);
-  document.getElementById('group-foto').classList.toggle('hidden', isReminder || type==='ingreso');
-  document.getElementById('tx-amount').parentElement.parentElement.classList.toggle('hidden', isReminder);
+  document.getElementById('group-amount').classList.toggle('hidden', isReminder);
+  // En modo rápido ocultamos descripción, fecha y foto
+  document.getElementById('group-desc').classList.toggle('hidden', quickMode || isReminder);
+  document.getElementById('group-fecha').classList.toggle('hidden', quickMode || isReminder);
+  document.getElementById('group-foto').classList.toggle('hidden', quickMode || isReminder || isIngreso);
+  document.getElementById('voice-input-btn').classList.toggle('hidden', isReminder);
 
   renderCategoryChips(type);
   selectedCategory = '';
@@ -1005,10 +1099,13 @@ async function renderConfiguracion() {
   // Cargar moneda y nombre
   const moneda = await getSetting('moneda','$');
   const nombre = await getSetting('nombreUsuario','');
+  const quickMode = await getSetting('quickMode', false);
   const monedaEl = document.getElementById('cfg-moneda');
   const nombreEl = document.getElementById('cfg-nombre');
+  const quickEl  = document.getElementById('cfg-quick-mode');
   if (monedaEl) monedaEl.value = moneda;
   if (nombreEl) nombreEl.value = nombre;
+  if (quickEl)  quickEl.checked = !!quickMode;
 
   // Renderizar listas de categorías
   renderCfgCatList('cfg-cat-gasto',   gastoCats,   'gasto');
@@ -1064,10 +1161,12 @@ function setupConfigHandlers() {
   });
   // Guardar preferencias generales
   document.getElementById('cfg-save-prefs-btn')?.addEventListener('click', async () => {
-    const moneda = document.getElementById('cfg-moneda').value.trim() || '$';
-    const nombre = document.getElementById('cfg-nombre').value.trim();
+    const moneda    = document.getElementById('cfg-moneda').value.trim() || '$';
+    const nombre    = document.getElementById('cfg-nombre').value.trim();
+    const quickMode = document.getElementById('cfg-quick-mode')?.checked || false;
     await setSetting('moneda', moneda);
     await setSetting('nombreUsuario', nombre);
+    await setSetting('quickMode', quickMode);
     showToast('✅ Preferencias guardadas');
   });
   // Instrucciones

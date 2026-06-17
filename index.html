@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#6C63FF" media="(prefers-color-scheme: light)" />
-  <meta name="theme-color" content="#0F0F1A" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#6C63FF" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -15,7 +14,7 @@
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <title>Finanzio</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -25,10 +24,7 @@
   <div id="install-banner" class="install-banner hidden">
     <div class="install-banner-content">
       <span class="install-icon">📲</span>
-      <div>
-        <p class="install-title">Instalá Finanzio</p>
-        <p class="install-sub">Acceso rápido desde tu pantalla de inicio</p>
-      </div>
+      <div><p class="install-title">Instalá Finanzio</p><p class="install-sub">Acceso directo desde tu pantalla</p></div>
     </div>
     <div class="install-actions">
       <button id="install-btn" class="btn-install">Instalar</button>
@@ -36,197 +32,162 @@
     </div>
   </div>
 
-  <!-- App Shell -->
   <div id="app">
 
-    <!-- Header -->
-    <header class="app-header" id="app-header">
+    <!-- HEADER -->
+    <header class="app-header">
       <div class="header-left">
         <button class="header-back hidden" id="back-btn" aria-label="Volver">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M12 4L6 10L12 16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M12 4L6 10L12 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
         <div class="header-brand" id="header-brand">
-          <span class="logo-mark">₿</span>
+          <div class="logo-pill">F</div>
           <span class="app-title">Finanzio</span>
         </div>
         <h2 class="page-title hidden" id="page-title"></h2>
       </div>
       <div class="header-right">
-        <button class="header-icon-btn" id="theme-toggle" aria-label="Cambiar tema">
-          <svg id="icon-sun" width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="3.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 2V4M10 16V18M2 10H4M16 10H18M4.22 4.22L5.64 5.64M14.36 14.36L15.78 15.78M4.22 15.78L5.64 14.36M14.36 5.64L15.78 4.22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-          <svg id="icon-moon" class="hidden" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M17 11.5A7 7 0 0 1 8.5 3a7.002 7.002 0 0 0 0 14A7.001 7.001 0 0 0 17 11.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        <button class="header-icon-btn" id="theme-toggle" aria-label="Tema">
+          <svg id="icon-sun" width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="3.5" stroke="currentColor" stroke-width="1.6"/><path d="M10 2V4M10 16V18M2 10H4M16 10H18M4.22 4.22L5.64 5.64M14.36 14.36L15.78 15.78M4.22 15.78L5.64 14.36M14.36 5.64L15.78 4.22" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <svg id="icon-moon" class="hidden" width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M17 11.5A7 7 0 0 1 8.5 3a7 7 0 1 0 8.5 8.5Z" stroke="currentColor" stroke-width="1.6"/></svg>
         </button>
-        <button class="header-icon-btn" id="notifications-btn" aria-label="Recordatorios" onclick="navigate('recordatorios')">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2a6 6 0 0 1 6 6c0 3.5 1.5 5 1.5 5h-15S4 11.5 4 8a6 6 0 0 1 6-6Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8.5 17a1.5 1.5 0 0 0 3 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <button class="header-icon-btn" onclick="navigate('recordatorios')" aria-label="Recordatorios" style="position:relative">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 2a6 6 0 0 1 6 6c0 3.5 1.5 5 1.5 5h-15S4 11.5 4 8a6 6 0 0 1 6-6Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.5 17a1.5 1.5 0 0 0 3 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
           <span class="notif-badge hidden" id="notif-badge">0</span>
         </button>
         <button class="header-icon-btn" onclick="navigate('configuracion')" aria-label="Configuración">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.22 4.22l1.42 1.42M14.36 14.36l1.42 1.42M4.22 15.78l1.42-1.42M14.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.22 4.22l1.42 1.42M14.36 14.36l1.42 1.42M4.22 15.78l1.42-1.42M14.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
         </button>
       </div>
     </header>
 
-    <!-- Main Content Area -->
     <main id="main-content">
 
-      <!-- DASHBOARD VIEW -->
+      <!-- ═══ DASHBOARD ═══ -->
       <section id="view-dashboard" class="view active">
-        
-        <!-- Month Selector + Balance Hero -->
-        <div class="hero-section">
-          <div class="month-nav">
-            <button class="month-btn" id="prev-month" aria-label="Mes anterior">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 4L6 8L10 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
-            <span class="month-label" id="month-label">Junio 2025</span>
-            <button class="month-btn" id="next-month" aria-label="Mes siguiente">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4L10 8L6 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
+
+        <!-- HERO compacto -->
+        <div class="hero2">
+          <div class="hero2-month">
+            <button class="month-btn" id="prev-month"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 3L5 7L9 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <span id="month-label" class="hero2-month-label">Junio 2025</span>
+            <button class="month-btn" id="next-month"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3L9 7L5 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
           </div>
-          <div class="balance-hero">
-            <p class="balance-label">Balance del mes</p>
-            <p class="balance-amount" id="hero-balance">$0</p>
-            <div class="balance-pills">
-              <span class="pill pill-income"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 9V3M3 6L6 3L9 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="hero-income">$0</span></span>
-              <span class="pill pill-expense"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 3V9M9 6L6 9L3 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="hero-expense">$0</span></span>
+          <div class="hero2-body">
+            <div class="hero2-balance">
+              <p class="hero2-label">Balance</p>
+              <p class="hero2-amount" id="hero-balance">$0</p>
+              <div class="hero2-pills">
+                <span class="hero2-pill income">↑ <span id="hero-income">$0</span></span>
+                <span class="hero2-pill expense">↓ <span id="hero-expense">$0</span></span>
+              </div>
             </div>
-          </div>
-          <!-- Health Score -->
-          <div class="health-card">
-            <div class="health-info">
-              <p class="health-label">Salud financiera</p>
-              <p class="health-score" id="health-score">--</p>
-            </div>
-            <div class="health-ring-wrap">
-              <svg class="health-ring" width="52" height="52" viewBox="0 0 52 52">
-                <circle cx="26" cy="26" r="22" fill="none" stroke="var(--ring-bg)" stroke-width="4"/>
-                <circle id="health-arc" cx="26" cy="26" r="22" fill="none" stroke="var(--ring-fill)" stroke-width="4" stroke-linecap="round" stroke-dasharray="138.2" stroke-dashoffset="138.2" transform="rotate(-90 26 26)"/>
+            <div class="hero2-donut">
+              <svg id="donut-svg" width="80" height="80" viewBox="0 0 80 80">
+                <circle cx="40" cy="40" r="30" fill="none" stroke="var(--surface-2)" stroke-width="10"/>
+                <g id="donut-arcs"></g>
               </svg>
+              <div class="donut-center">
+                <span id="health-score" class="donut-score">--</span>
+              </div>
             </div>
-            <p class="health-tip" id="health-tip">Cargá tus datos para ver el score</p>
           </div>
+          <!-- Alerta vencimientos -->
+          <div id="due-alert" class="due-alert hidden"></div>
         </div>
 
-        <!-- Accesos Rápidos -->
+        <!-- ACCESOS RÁPIDOS -->
         <div class="section-block">
           <div class="section-header">
-            <h3 class="section-title">⚡ Accesos rápidos</h3>
-            <button class="section-link" onclick="openShortcutEditor()">Editar</button>
+            <h3 class="section-title">⚡ Rápido</h3>
+            <button class="section-link" onclick="openShortcutEditor()">+ Editar</button>
           </div>
           <div id="quick-shortcuts-grid" class="shortcuts-grid"></div>
         </div>
 
-        <!-- Budget Overview Bar -->
+        <!-- PRESUPUESTO -->
         <div class="section-block" id="budget-overview-block">
           <div class="section-header">
-            <h3 class="section-title">Presupuesto del mes</h3>
+            <h3 class="section-title">Presupuesto</h3>
             <button class="section-link" onclick="navigate('presupuesto')">Ver todo</button>
           </div>
           <div id="budget-bars-container" class="budget-bars"></div>
-          <p class="empty-hint hidden" id="budget-empty">No configuraste presupuesto aún.<br><button class="link-btn" onclick="navigate('presupuesto')">Configurar ahora</button></p>
+          <p class="empty-hint hidden" id="budget-empty">Sin presupuesto. <button class="link-btn" onclick="navigate('presupuesto')">Configurar</button></p>
         </div>
 
-        <!-- Quick Cards Grid -->
+        <!-- MÓDULOS -->
         <div class="section-block">
-          <h3 class="section-title">Accesos rápidos</h3>
-          <div class="cards-grid">
-            <button class="nav-card" onclick="navigate('gastos')">
-              <div class="nav-card-icon nc-purple">
-                <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="5" width="18" height="13" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M2 9h18" stroke="currentColor" stroke-width="1.6"/><circle cx="6.5" cy="14" r="1" fill="currentColor"/></svg>
-              </div>
-              <span class="nav-card-label">Gastos</span>
-              <span class="nav-card-sub" id="nc-gastos">$0 este mes</span>
+          <h3 class="section-title">Módulos</h3>
+          <div class="module-grid">
+            <button class="module-card" onclick="navigate('gastos')">
+              <div class="module-icon nc-purple">💸</div>
+              <span class="module-label">Gastos</span>
+              <span class="module-sub" id="nc-gastos">$0</span>
             </button>
-            <button class="nav-card" onclick="navigate('ingresos')">
-              <div class="nav-card-icon nc-green">
-                <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 3v16M5 9l6-6 6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </div>
-              <span class="nav-card-label">Ingresos</span>
-              <span class="nav-card-sub" id="nc-ingresos">$0 este mes</span>
+            <button class="module-card" onclick="navigate('ingresos')">
+              <div class="module-icon nc-green">💵</div>
+              <span class="module-label">Ingresos</span>
+              <span class="module-sub" id="nc-ingresos">$0</span>
             </button>
-            <button class="nav-card" onclick="navigate('super')">
-              <div class="nav-card-icon nc-blue">
-                <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 3h2l2.5 11h9l2.5-7H7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="18" r="1.2" fill="currentColor"/><circle cx="16" cy="18" r="1.2" fill="currentColor"/></svg>
-              </div>
-              <span class="nav-card-label">Súper</span>
-              <span class="nav-card-sub" id="nc-super">Sin lista activa</span>
+            <button class="module-card" onclick="navigate('super')">
+              <div class="module-icon nc-blue">🛒</div>
+              <span class="module-label">Súper</span>
+              <span class="module-sub" id="nc-super">—</span>
             </button>
-            <button class="nav-card" onclick="navigate('casa')">
-              <div class="nav-card-icon nc-amber">
-                <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 10.5L11 3L19 10.5V19H14v-5H8v5H3V10.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-              </div>
-              <span class="nav-card-label">Casa</span>
-              <span class="nav-card-sub" id="nc-casa">$0 este mes</span>
+            <button class="module-card" onclick="navigate('casa')">
+              <div class="module-icon nc-amber">🏠</div>
+              <span class="module-label">Casa</span>
+              <span class="module-sub" id="nc-casa">$0</span>
             </button>
-            <button class="nav-card" onclick="navigate('presupuesto')">
-              <div class="nav-card-icon nc-coral">
-                <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.6"/><path d="M11 7v4l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-              </div>
-              <span class="nav-card-label">Presupuesto</span>
-              <span class="nav-card-sub" id="nc-presupuesto">Sin configurar</span>
+            <button class="module-card" onclick="navigate('presupuesto')">
+              <div class="module-icon nc-coral">📊</div>
+              <span class="module-label">Presupuesto</span>
+              <span class="module-sub" id="nc-presupuesto">—</span>
             </button>
-            <button class="nav-card" onclick="navigate('recordatorios')">
-              <div class="nav-card-icon nc-pink">
-                <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2a7 7 0 0 1 7 7c0 4 1.5 5.5 1.5 5.5H3.5S5 13 5 9a7 7 0 0 1 7-7Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 18.5a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-              </div>
-              <span class="nav-card-label">Recordatorios</span>
-              <span class="nav-card-sub" id="nc-recordatorios">Sin pendientes</span>
+            <button class="module-card" onclick="navigate('recordatorios')">
+              <div class="module-icon nc-pink">🔔</div>
+              <span class="module-label">Recordatorios</span>
+              <span class="module-sub" id="nc-recordatorios">—</span>
             </button>
           </div>
         </div>
 
-        <!-- Recent Transactions -->
+        <!-- ÚLTIMOS MOVIMIENTOS -->
         <div class="section-block">
           <div class="section-header">
             <h3 class="section-title">Últimos movimientos</h3>
             <button class="section-link" onclick="navigate('gastos')">Ver todos</button>
           </div>
-          <div id="recent-list" class="tx-list">
-            <div class="empty-state">
-              <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="4" y="8" width="32" height="24" rx="4" stroke="var(--color-muted)" stroke-width="1.5"/><path d="M4 15h32" stroke="var(--color-muted)" stroke-width="1.5"/><path d="M10 22h8M10 26h5" stroke="var(--color-muted)" stroke-width="1.5" stroke-linecap="round"/></svg>
-              <p>Todavía no hay movimientos este mes</p>
-              <button class="btn-primary" onclick="openAddModal('gasto')">+ Agregar gasto</button>
-            </div>
-          </div>
+          <div id="recent-list" class="tx-list"></div>
         </div>
 
-        <!-- Consejos IA -->
-        <div class="section-block" id="ai-tips-block">
-          <div class="section-header">
-            <h3 class="section-title">Consejos para vos</h3>
-          </div>
+        <!-- CONSEJOS -->
+        <div class="section-block" style="padding-bottom:8px">
+          <h3 class="section-title" style="margin-bottom:10px">Consejos</h3>
           <div id="ai-tips-list" class="tips-list"></div>
         </div>
 
       </section>
 
-      <!-- GASTOS VIEW -->
+      <!-- ═══ GASTOS ═══ -->
       <section id="view-gastos" class="view">
         <div class="view-filters">
           <div class="filter-chips" id="gastos-filter-chips">
             <button class="chip active" data-cat="all">Todos</button>
-            <button class="chip" data-cat="Comida">Comida</button>
-            <button class="chip" data-cat="Transporte">Transporte</button>
-            <button class="chip" data-cat="Salud">Salud</button>
-            <button class="chip" data-cat="Ocio">Ocio</button>
-            <button class="chip" data-cat="Otros">Otros</button>
           </div>
         </div>
         <div id="gastos-list" class="tx-list padded"></div>
       </section>
 
-      <!-- INGRESOS VIEW -->
+      <!-- ═══ INGRESOS ═══ -->
       <section id="view-ingresos" class="view">
         <div id="ingresos-list" class="tx-list padded"></div>
       </section>
 
-      <!-- SUPER VIEW -->
+      <!-- ═══ SUPERMERCADO ═══ -->
       <section id="view-super" class="view">
         <div class="super-header-bar">
-          <div class="super-stats" id="super-stats">
-            <span id="super-checked-count">0 / 0 items</span>
-            <span class="super-total" id="super-total-price">$0.00 estimado</span>
-          </div>
+          <div><span id="super-checked-count" class="super-stat-main">0 / 0 items</span><span class="super-stat-sub" id="super-total-price">$0 marcado</span></div>
           <button class="btn-secondary" id="clear-checked-btn">Limpiar tildados</button>
         </div>
         <div id="super-list" class="super-list"></div>
@@ -238,97 +199,82 @@
           </button>
         </div>
         <div class="super-history-section">
-          <div class="section-header">
-            <h3 class="section-title">Historial de compras</h3>
-          </div>
+          <div class="section-header"><h3 class="section-title">Historial</h3></div>
           <div id="super-history-list" class="history-list"></div>
         </div>
       </section>
 
-      <!-- CASA VIEW -->
+      <!-- ═══ CASA ═══ -->
       <section id="view-casa" class="view">
         <div class="view-filters">
           <div class="filter-chips" id="casa-filter-chips">
             <button class="chip active" data-cat="all">Todos</button>
-            <button class="chip" data-cat="Luz">Luz</button>
-            <button class="chip" data-cat="Gas">Gas</button>
-            <button class="chip" data-cat="Agua">Agua</button>
-            <button class="chip" data-cat="Internet">Internet</button>
-            <button class="chip" data-cat="Arreglo">Arreglo</button>
-            <button class="chip" data-cat="Otros">Otros</button>
           </div>
         </div>
         <div id="casa-list" class="tx-list padded"></div>
       </section>
 
-      <!-- PRESUPUESTO VIEW -->
+      <!-- ═══ PRESUPUESTO ═══ -->
       <section id="view-presupuesto" class="view">
-        <div class="presupuesto-section padded">
-          <p class="section-hint">Fijá un límite mensual para cada categoría y te avisamos cuando te estés acercando.</p>
+        <div class="padded">
+          <p class="section-hint" style="margin-bottom:14px">Fijá un límite mensual por categoría.</p>
           <div id="presupuesto-items" class="budget-config-list"></div>
           <button class="btn-secondary full-width mt-2" id="add-budget-category-btn">+ Agregar categoría</button>
         </div>
       </section>
 
-      <!-- RECORDATORIOS VIEW -->
+      <!-- ═══ RECORDATORIOS ═══ -->
       <section id="view-recordatorios" class="view">
         <div id="recordatorios-list" class="tx-list padded"></div>
       </section>
 
-      <!-- CONFIGURACIÓN VIEW -->
+      <!-- ═══ CONFIGURACIÓN ═══ -->
       <section id="view-configuracion" class="view">
 
-        <!-- Preferencias generales -->
         <div class="section-block">
           <h3 class="section-title">👤 Preferencias</h3>
           <div class="form-group" style="margin-top:12px">
-            <label class="form-label">Tu nombre (opcional)</label>
+            <label class="form-label">Tu nombre</label>
             <input type="text" id="cfg-nombre" class="form-input" placeholder="Ej: Dario" maxlength="30" />
           </div>
           <div class="form-group">
             <label class="form-label">Símbolo de moneda</label>
             <input type="text" id="cfg-moneda" class="form-input" placeholder="$" maxlength="4" style="max-width:80px" />
           </div>
-          <button id="cfg-save-prefs-btn" class="btn-primary full-width" style="margin-top:4px">Guardar preferencias</button>
-        </div>
-
-        <!-- Apariencia -->
-        <div class="section-block">
-          <h3 class="section-title">🎨 Apariencia</h3>
-          <p class="section-hint">Cambiá el tema desde el ícono ☀️/🌙 en el header.</p>
-        </div>
-
-        <!-- Categorías de Gastos -->
-        <div class="section-block">
-          <div class="section-header">
-            <h3 class="section-title">💸 Categorías de Gastos</h3>
+          <div class="form-group">
+            <label class="form-label">Modo registro rápido</label>
+            <label class="toggle-row">
+              <span class="toggle-label">Solo monto + categoría al agregar</span>
+              <div class="toggle-wrap">
+                <input type="checkbox" id="cfg-quick-mode" class="toggle-input" />
+                <div class="toggle-track"><div class="toggle-thumb"></div></div>
+              </div>
+            </label>
           </div>
+          <button id="cfg-save-prefs-btn" class="btn-primary full-width" style="margin-top:8px">Guardar preferencias</button>
+        </div>
+
+        <div class="section-block">
+          <h3 class="section-title">💸 Categorías de Gastos</h3>
           <div id="cfg-cat-gasto" class="cfg-cat-list"></div>
-          <button id="cfg-add-gasto-btn" class="btn-secondary full-width mt-2">+ Agregar categoría</button>
+          <button id="cfg-add-gasto-btn" class="btn-secondary full-width mt-2">+ Agregar</button>
         </div>
 
-        <!-- Categorías de Casa -->
         <div class="section-block">
-          <div class="section-header">
-            <h3 class="section-title">🏠 Categorías de Casa</h3>
-          </div>
+          <h3 class="section-title">🏠 Categorías de Casa</h3>
           <div id="cfg-cat-casa" class="cfg-cat-list"></div>
-          <button id="cfg-add-casa-btn" class="btn-secondary full-width mt-2">+ Agregar categoría</button>
+          <button id="cfg-add-casa-btn" class="btn-secondary full-width mt-2">+ Agregar</button>
         </div>
 
-        <!-- Categorías de Ingresos -->
         <div class="section-block">
-          <div class="section-header">
-            <h3 class="section-title">💵 Categorías de Ingresos</h3>
-          </div>
+          <h3 class="section-title">💵 Categorías de Ingresos</h3>
           <div id="cfg-cat-ingreso" class="cfg-cat-list"></div>
-          <button id="cfg-add-ingreso-btn" class="btn-secondary full-width mt-2">+ Agregar categoría</button>
+          <button id="cfg-add-ingreso-btn" class="btn-secondary full-width mt-2">+ Agregar</button>
         </div>
 
-        <!-- IA Groq -->
         <div class="section-block">
           <h3 class="section-title">✨ Escaneo con IA (Groq)</h3>
-          <p class="section-hint">Escaneá tickets automáticamente con inteligencia artificial. Necesitás una clave gratuita de Groq.</p>
+          <p class="section-hint" style="margin-top:6px">Escaneá tickets y registrá por voz. Necesitás una clave gratuita.</p>
           <div id="cfg-key-not-set" class="api-status api-status-warn" style="margin-top:8px">⚠️ Sin configurar</div>
           <div id="cfg-key-set" class="api-status api-status-ok hidden" style="margin-top:8px">✅ IA activada</div>
           <div class="form-group" style="margin-top:12px">
@@ -341,84 +287,74 @@
           </div>
           <button class="link-btn-block" id="cfg-show-instructions">¿Cómo conseguir la clave? (gratis)</button>
           <div id="cfg-instructions" class="instructions-box hidden">
-            <p class="instructions-title">Paso a paso (2 min):</p>
             <ol class="instructions-list">
               <li>Entrá a <a href="https://console.groq.com" target="_blank" rel="noopener">console.groq.com</a></li>
-              <li>Sign Up con Gmail (sin tarjeta de crédito)</li>
-              <li>Menú izquierdo → <strong>API Keys</strong> → <strong>Create API Key</strong></li>
-              <li>Copiá la clave y pegala arriba</li>
-              <li>Tocá Guardar</li>
+              <li>Sign Up con Gmail (sin tarjeta)</li>
+              <li><strong>API Keys</strong> → <strong>Create API Key</strong></li>
+              <li>Copiá la clave y pegala arriba → Guardar</li>
             </ol>
-            <p class="instructions-warn">⚠️ La clave se guarda solo en tu celu.</p>
           </div>
           <button class="link-btn-block danger" id="cfg-clear-key-btn">Borrar clave guardada</button>
         </div>
 
-        <!-- Datos -->
         <div class="section-block">
           <h3 class="section-title">💾 Datos</h3>
-          <p class="section-hint">Exportá un backup completo o restaurá uno anterior.</p>
-          <div style="display:flex;gap:10px;margin-top:8px">
+          <div style="display:flex;gap:10px;margin-top:10px">
             <button id="cfg-export-btn" class="btn-secondary" style="flex:1">⬇ Exportar</button>
             <button id="cfg-import-btn" class="btn-secondary" style="flex:1">⬆ Importar</button>
           </div>
           <input type="file" id="cfg-import-file" accept="application/json" class="hidden" />
         </div>
 
-        <!-- Acerca de -->
         <div class="section-block" style="padding-bottom:24px">
           <h3 class="section-title">ℹ️ Acerca de</h3>
-          <p class="section-hint" style="margin-top:8px">Finanzio v1.0 · Tu asistente financiero personal · Datos guardados en este dispositivo.</p>
+          <p class="section-hint" style="margin-top:8px">Finanzio v2.0 · Datos guardados en este dispositivo.</p>
         </div>
 
       </section>
 
     </main>
 
-    <!-- Bottom Navigation -->
-    <nav class="bottom-nav" id="bottom-nav">
-      <button class="nav-btn active" data-view="dashboard" onclick="navigate('dashboard')" aria-label="Inicio">
-        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 10.5L11 3L19 10.5V19H14v-5H8v5H3V10.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+      <button class="nav-btn active" data-view="dashboard" onclick="navigate('dashboard')">
+        <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><path d="M3 10.5L11 3L19 10.5V19H14v-5H8v5H3V10.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
         <span>Inicio</span>
       </button>
-      <button class="nav-btn" data-view="gastos" onclick="navigate('gastos')" aria-label="Gastos">
-        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="5" width="18" height="13" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M2 9h18" stroke="currentColor" stroke-width="1.6"/><circle cx="6.5" cy="14" r="1" fill="currentColor"/></svg>
+      <button class="nav-btn" data-view="gastos" onclick="navigate('gastos')">
+        <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><rect x="2" y="5" width="18" height="13" rx="2.5" stroke="currentColor" stroke-width="1.7"/><path d="M2 9h18" stroke="currentColor" stroke-width="1.7"/><circle cx="6.5" cy="14" r="1" fill="currentColor"/></svg>
         <span>Gastos</span>
       </button>
-      <button class="nav-btn nav-btn-fab" onclick="openActionSheet()" aria-label="Agregar">
-        <div class="fab-inner">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
-        </div>
+      <button class="nav-btn nav-btn-fab" onclick="openActionSheet()">
+        <div class="fab-inner"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></div>
       </button>
-      <button class="nav-btn" data-view="super" onclick="navigate('super')" aria-label="Supermercado">
-        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 3h2l2.5 11h9l2.5-7H7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="18" r="1.2" fill="currentColor"/><circle cx="16" cy="18" r="1.2" fill="currentColor"/></svg>
+      <button class="nav-btn" data-view="super" onclick="navigate('super')">
+        <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><path d="M3 3h2l2.5 11h9l2.5-7H7.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="18" r="1.2" fill="currentColor"/><circle cx="16" cy="18" r="1.2" fill="currentColor"/></svg>
         <span>Súper</span>
       </button>
-      <button class="nav-btn" data-view="ingresos" onclick="navigate('ingresos')" aria-label="Ingresos">
-        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 3v16M5 9l6-6 6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <button class="nav-btn" data-view="ingresos" onclick="navigate('ingresos')">
+        <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><path d="M11 3v16M5 9l6-6 6 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <span>Ingresos</span>
       </button>
     </nav>
 
-    <!-- ADD / EDIT MODAL -->
+    <!-- MODAL PRINCIPAL -->
     <div id="modal-overlay" class="modal-overlay hidden">
       <div class="modal-sheet" id="modal-sheet">
         <div class="modal-handle"></div>
         <div class="modal-header">
           <h3 class="modal-title" id="modal-title">Nuevo gasto</h3>
-          <button class="modal-close" onclick="closeModal()" aria-label="Cerrar">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-          </button>
+          <button class="modal-close" onclick="closeModal()"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
         </div>
         <form id="transaction-form" class="modal-form" onsubmit="submitTransaction(event)">
-          <input type="hidden" id="edit-id" value="" />
+          <input type="hidden" id="edit-id" />
           <input type="hidden" id="tx-type" value="gasto" />
 
-          <div class="form-group">
+          <div class="form-group" id="group-amount">
             <label class="form-label">Monto *</label>
             <div class="amount-input-wrap">
               <span class="currency-symbol">$</span>
-              <input type="number" id="tx-amount" class="form-input amount-input" placeholder="0.00" step="0.01" min="0" required />
+              <input type="number" id="tx-amount" class="form-input amount-input" placeholder="0" step="0.01" min="0" required inputmode="decimal" />
             </div>
           </div>
 
@@ -427,228 +363,143 @@
             <div class="category-chips" id="category-chips-modal"></div>
           </div>
 
-          <div class="form-group">
-            <label class="form-label">Descripción</label>
+          <div class="form-group" id="group-desc">
+            <label class="form-label">Descripción <span style="color:var(--text-3);font-weight:400">(opcional)</span></label>
             <input type="text" id="tx-desc" class="form-input" placeholder="¿En qué fue?" maxlength="80" />
+            <p class="autocat-hint hidden" id="autocat-hint">✨ Sugerencia de categoría...</p>
           </div>
 
-          <div class="form-group">
+          <div class="form-group" id="group-fecha">
             <label class="form-label">Fecha</label>
             <input type="date" id="tx-date" class="form-input" required />
           </div>
 
-          <!-- Foto de ticket -->
           <div class="form-group" id="group-foto">
-            <label class="form-label">Foto del ticket (opcional)</label>
-            <div class="ticket-upload" id="ticket-upload-area">
-              <input type="file" id="ticket-file" accept="image/*" capture="environment" class="file-input-hidden" />
+            <label class="form-label">Foto del ticket</label>
+            <div class="ticket-upload">
+              <input type="file" id="ticket-file" accept="image/*" capture="environment" class="hidden" />
               <div class="ticket-actions-row" id="ticket-actions-row">
-                <button type="button" class="ticket-action-btn ticket-scan-btn" onclick="scanTicketAI()">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M19 16L19.7 18.3L22 19L19.7 19.7L19 22L18.3 19.7L16 19L18.3 18.3L19 16Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
-                  <span>Escanear con IA</span>
-                </button>
-                <button type="button" class="ticket-action-btn ticket-photo-btn" onclick="document.getElementById('ticket-file').click()">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="2" y="6" width="20" height="14" rx="2.5" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="13" r="3.5" stroke="currentColor" stroke-width="1.6"/><path d="M8 6l1.5-3h5L16 6" stroke="currentColor" stroke-width="1.6"/></svg>
-                  <span>Solo foto</span>
-                </button>
+                <button type="button" class="ticket-action-btn ticket-scan-btn" onclick="scanTicketAI()">✨ Escanear con IA</button>
+                <button type="button" class="ticket-action-btn ticket-photo-btn" onclick="document.getElementById('ticket-file').click()">📷 Solo foto</button>
               </div>
               <div id="ocr-status" class="ocr-status hidden">
                 <div class="ocr-spinner"></div>
-                <div class="ocr-text">
-                  <p class="ocr-title" id="ocr-title">Leyendo ticket...</p>
-                  <p class="ocr-progress" id="ocr-progress">0%</p>
-                </div>
+                <div><p id="ocr-title" class="ocr-title">Analizando...</p><p id="ocr-progress" class="ocr-progress"></p></div>
               </div>
               <div id="ocr-result" class="ocr-result hidden">
                 <p class="ocr-result-label">Importe detectado</p>
                 <p class="ocr-result-amount" id="ocr-result-amount">$0</p>
-                <p class="ocr-result-hint">Revisalo arriba y corregilo si hace falta</p>
+                <p class="ocr-result-hint">Revisá y guardá</p>
               </div>
-              <img id="ticket-preview" class="ticket-preview hidden" alt="Vista previa del ticket" />
-              <button type="button" id="ticket-remove" class="ticket-remove hidden" onclick="removeTicket()">Quitar foto</button>
+              <img id="ticket-preview" class="ticket-preview hidden" alt="Ticket" />
+              <button type="button" id="ticket-remove" class="ticket-remove hidden" onclick="removeTicket()">✕ Quitar foto</button>
             </div>
           </div>
 
-          <!-- Recordatorio fields -->
           <div id="group-reminder" class="hidden">
             <div class="form-group">
               <label class="form-label">Nombre del pago</label>
-              <input type="text" id="reminder-name" class="form-input" placeholder="Ej: Luz, tarjeta, alquiler" />
+              <input type="text" id="reminder-name" class="form-input" placeholder="Ej: Luz, tarjeta" />
             </div>
             <div class="form-group">
               <label class="form-label">Fecha de vencimiento</label>
               <input type="date" id="reminder-date" class="form-input" />
             </div>
             <div class="form-group">
-              <label class="form-label">Monto aproximado</label>
-              <div class="amount-input-wrap">
-                <span class="currency-symbol">$</span>
-                <input type="number" id="reminder-amount" class="form-input amount-input" placeholder="0.00" step="0.01" min="0" />
+              <label class="form-label">Monto aprox.</label>
+              <div class="amount-input-wrap"><span class="currency-symbol">$</span>
+                <input type="number" id="reminder-amount" class="form-input amount-input" placeholder="0" step="0.01" min="0" />
               </div>
             </div>
           </div>
 
           <button type="button" id="voice-input-btn" class="btn-voice" onclick="startVoiceInput()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3Z" stroke="currentColor" stroke-width="1.6"/><path d="M19 10a7 7 0 0 1-14 0M12 19v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3Z" stroke="currentColor" stroke-width="1.7"/><path d="M19 10a7 7 0 0 1-14 0M12 19v3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
             Hablar
           </button>
-
           <button type="submit" class="btn-primary full-width" id="submit-btn">Guardar</button>
         </form>
       </div>
     </div>
 
-    <!-- Toast -->
+    <!-- TOAST -->
     <div id="toast" class="toast hidden"></div>
 
-    <!-- Add Budget Category Modal -->
+    <!-- BUDGET MODAL -->
     <div id="budget-modal-overlay" class="modal-overlay hidden" onclick="closeBudgetModal(event)">
       <div class="modal-sheet">
         <div class="modal-handle"></div>
         <div class="modal-header">
-          <h3 class="modal-title">Configurar límite</h3>
-          <button class="modal-close" onclick="closeBudgetModal()" aria-label="Cerrar">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-          </button>
+          <h3 class="modal-title">Límite mensual</h3>
+          <button class="modal-close" onclick="closeBudgetModal()"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
         </div>
         <form id="budget-form" class="modal-form" onsubmit="submitBudget(event)">
-          <input type="hidden" id="budget-edit-cat" value="" />
+          <input type="hidden" id="budget-edit-cat" />
           <div class="form-group">
             <label class="form-label">Categoría</label>
-            <select id="budget-cat" class="form-input form-select">
-              <option value="">Seleccioná una categoría</option>
-              <option>Comida</option><option>Transporte</option><option>Salud</option>
-              <option>Ocio</option><option>Luz</option><option>Gas</option>
-              <option>Agua</option><option>Internet</option><option>Arreglo</option>
-              <option>Ropa</option><option>Educación</option><option>Otros</option>
-            </select>
+            <select id="budget-cat" class="form-input form-select"></select>
           </div>
           <div class="form-group">
-            <label class="form-label">Límite mensual ($)</label>
-            <div class="amount-input-wrap">
-              <span class="currency-symbol">$</span>
-              <input type="number" id="budget-limit" class="form-input amount-input" placeholder="0.00" step="0.01" min="0" required />
+            <label class="form-label">Límite ($)</label>
+            <div class="amount-input-wrap"><span class="currency-symbol">$</span>
+              <input type="number" id="budget-limit" class="form-input amount-input" placeholder="0" step="0.01" min="0" required />
             </div>
           </div>
-          <button type="submit" class="btn-primary full-width">Guardar límite</button>
+          <button type="submit" class="btn-primary full-width">Guardar</button>
         </form>
       </div>
     </div>
 
-    <!-- Image Viewer -->
+    <!-- IMG VIEWER -->
     <div id="img-viewer" class="img-viewer hidden" onclick="closeImgViewer()">
       <img id="img-viewer-src" alt="Ticket" />
-      <button class="img-viewer-close" onclick="closeImgViewer()" aria-label="Cerrar">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 4l12 12M16 4L4 16" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
-      </button>
+      <button class="img-viewer-close" onclick="closeImgViewer()"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 4l12 12M16 4L4 16" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></button>
     </div>
 
-    <!-- Action Sheet (+ button) -->
+    <!-- ACTION SHEET -->
     <div id="action-sheet-overlay" class="modal-overlay hidden" onclick="closeActionSheet(event)">
       <div class="action-sheet">
         <div class="modal-handle"></div>
         <p class="action-sheet-title">¿Qué querés agregar?</p>
         <div class="action-options">
           <button class="action-option" onclick="actionSelect('gasto')">
-            <div class="action-icon nc-purple">
-              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="5" width="18" height="13" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M2 9h18" stroke="currentColor" stroke-width="1.6"/><circle cx="6.5" cy="14" r="1" fill="currentColor"/></svg>
-            </div>
-            <div class="action-text">
-              <span class="action-label">Gasto</span>
-              <span class="action-sub">Comida, transporte, salud, etc.</span>
-            </div>
+            <div class="action-icon nc-purple">💸</div>
+            <div class="action-text"><span class="action-label">Gasto</span><span class="action-sub">Comida, transporte, salud...</span></div>
           </button>
           <button class="action-option" onclick="actionSelect('ingreso')">
-            <div class="action-icon nc-green">
-              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 3v16M5 9l6-6 6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </div>
-            <div class="action-text">
-              <span class="action-label">Ingreso</span>
-              <span class="action-sub">Sueldo, ventas, freelance</span>
-            </div>
+            <div class="action-icon nc-green">💵</div>
+            <div class="action-text"><span class="action-label">Ingreso</span><span class="action-sub">Sueldo, ventas, freelance</span></div>
           </button>
           <button class="action-option" onclick="actionSelect('casa')">
-            <div class="action-icon nc-amber">
-              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 10.5L11 3L19 10.5V19H14v-5H8v5H3V10.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-            </div>
-            <div class="action-text">
-              <span class="action-label">Casa</span>
-              <span class="action-sub">Luz, gas, agua, arreglos</span>
-            </div>
+            <div class="action-icon nc-amber">🏠</div>
+            <div class="action-text"><span class="action-label">Casa</span><span class="action-sub">Luz, gas, agua, arreglos</span></div>
           </button>
           <button class="action-option" onclick="actionSelect('recordatorio')">
-            <div class="action-icon nc-pink">
-              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2a7 7 0 0 1 7 7c0 4 1.5 5.5 1.5 5.5H3.5S5 13 5 9a7 7 0 0 1 7-7Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 18.5a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-            </div>
-            <div class="action-text">
-              <span class="action-label">Recordatorio</span>
-              <span class="action-sub">Pago o vencimiento futuro</span>
-            </div>
+            <div class="action-icon nc-pink">🔔</div>
+            <div class="action-text"><span class="action-label">Recordatorio</span><span class="action-sub">Pago o vencimiento</span></div>
           </button>
         </div>
         <button class="action-cancel" onclick="closeActionSheet()">Cancelar</button>
       </div>
     </div>
 
-    <!-- Settings Modal -->
-    <div id="settings-modal-overlay" class="modal-overlay hidden" onclick="closeSettingsModal(event)">
-      <div class="modal-sheet">
-        <div class="modal-handle"></div>
-        <div class="modal-header">
-          <h3 class="modal-title">Configuración</h3>
-          <button class="modal-close" onclick="closeSettingsModal()" aria-label="Cerrar">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-          </button>
-        </div>
-        <div class="modal-form">
-          <div class="settings-section">
-            <h4 class="settings-section-title">✨ Escaneo con IA (Groq)</h4>
-            <p class="settings-hint">Para escanear tickets con IA necesitás una clave gratuita de Groq.</p>
-            <div id="api-key-not-set" class="api-status api-status-warn">⚠️ Sin configurar</div>
-            <div id="api-key-set" class="api-status api-status-ok hidden">✅ IA activada</div>
-            <div class="form-group">
-              <label class="form-label">API Key de Groq</label>
-              <input type="password" id="groq-api-key" class="form-input" placeholder="gsk_..." autocomplete="off" />
-            </div>
-            <div class="form-actions-row">
-              <button type="button" class="btn-secondary" onclick="testGroqKey()">Probar</button>
-              <button type="button" class="btn-primary" onclick="saveGroqKey()">Guardar</button>
-            </div>
-            <button type="button" class="link-btn-block" onclick="toggleInstructions()">¿Cómo conseguir la clave? (gratis)</button>
-            <div id="api-instructions" class="instructions-box hidden">
-              <p class="instructions-title">Paso a paso:</p>
-              <ol class="instructions-list">
-                <li>Entrá a <a href="https://console.groq.com" target="_blank">console.groq.com</a></li>
-                <li>Sign Up con Gmail (sin tarjeta)</li>
-                <li>API Keys → Create API Key → copiá la clave</li>
-                <li>Pegala arriba y guardá</li>
-              </ol>
-            </div>
-            <button type="button" class="link-btn-block danger" id="clear-key-btn" onclick="clearGroqKey()">Borrar clave</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal Acceso Rápido -->
+    <!-- SHORTCUT MODAL -->
     <div id="shortcut-modal-overlay" class="modal-overlay hidden">
       <div class="modal-sheet">
         <div class="modal-handle"></div>
         <div class="modal-header">
-          <h3 class="modal-title" id="sc-modal-title">Nuevo acceso rápido</h3>
-          <button class="modal-close" id="sc-close-btn" aria-label="Cerrar">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-          </button>
+          <h3 class="modal-title" id="sc-modal-title">Acceso rápido</h3>
+          <button class="modal-close" id="sc-close-btn"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
         </div>
         <form id="sc-form" class="modal-form">
-          <input type="hidden" id="sc-edit-idx" value="" />
+          <input type="hidden" id="sc-edit-idx" />
           <div class="form-group">
             <label class="form-label">Ícono (emoji)</label>
-            <input type="text" id="sc-icon" class="form-input" placeholder="⛽" maxlength="4" style="font-size:24px;text-align:center" />
+            <input type="text" id="sc-icon" class="form-input" placeholder="⛽" maxlength="4" style="font-size:26px;text-align:center;letter-spacing:4px" />
           </div>
           <div class="form-group">
-            <label class="form-label">Nombre del acceso</label>
-            <input type="text" id="sc-label" class="form-input" placeholder="Ej: Nafta, Almuerzo..." maxlength="20" required />
+            <label class="form-label">Nombre</label>
+            <input type="text" id="sc-label" class="form-input" placeholder="Ej: Nafta" maxlength="20" required />
           </div>
           <div class="form-group">
             <label class="form-label">Tipo</label>
@@ -659,7 +510,7 @@
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Categoría (opcional)</label>
+            <label class="form-label">Categoría</label>
             <select id="sc-category" class="form-input form-select"></select>
           </div>
           <button type="submit" class="btn-primary full-width">Guardar</button>
@@ -668,22 +519,20 @@
       </div>
     </div>
 
-    <!-- Modal Categoría -->
+    <!-- CAT MODAL -->
     <div id="cat-modal-overlay" class="modal-overlay hidden">
       <div class="modal-sheet">
         <div class="modal-handle"></div>
         <div class="modal-header">
-          <h3 class="modal-title" id="cat-modal-title">Nueva categoría</h3>
-          <button class="modal-close" id="cat-modal-close" aria-label="Cerrar">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-          </button>
+          <h3 class="modal-title" id="cat-modal-title">Categoría</h3>
+          <button class="modal-close" id="cat-modal-close"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
         </div>
         <form id="cat-modal-form" class="modal-form">
           <input type="hidden" id="cat-modal-type" />
           <input type="hidden" id="cat-modal-edit-name" />
           <div class="form-group">
             <label class="form-label">Ícono (emoji)</label>
-            <input type="text" id="cat-modal-icon" class="form-input" placeholder="🛒" maxlength="4" style="font-size:24px;text-align:center" />
+            <input type="text" id="cat-modal-icon" class="form-input" placeholder="🛒" maxlength="4" style="font-size:26px;text-align:center" />
           </div>
           <div class="form-group">
             <label class="form-label">Nombre</label>
@@ -696,7 +545,6 @@
 
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
   <script src="db.js"></script>
   <script src="app.js"></script>
 </body>
